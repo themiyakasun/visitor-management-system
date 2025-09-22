@@ -4,7 +4,7 @@ const { User } = require('../models');
 const { getUserPermissions } = require('../utils/helpers.js');
 
 const generateToken = ({ userId, tenantId }) => {
-  return jwt.sign({ userId, tenantId }, process.env.JWT_SECRET, {
+  return jwt.sign({ id: userId, tenantId }, process.env.JWT_SECRET, {
     expiresIn: process.env.JWT_EXPIRES_IN,
   });
 };
@@ -27,7 +27,7 @@ const login = async (req, res) => {
     if (!isPasswordMatch)
       return res.status(401).json({ message: 'Invalid credentials' });
 
-    const token = generateToken(user.id, user.tenant.id);
+    const token = generateToken({ userId: user.id, tenantId: user.tenant.id });
     const userPermissions = getUserPermissions(user);
 
     return res.status(200).json({
@@ -43,6 +43,31 @@ const login = async (req, res) => {
   }
 };
 
+const changePassword = async (req, res) => {
+  const { oldPassword, newPassword } = req.body;
+  try {
+    console.log(req.user.id);
+    const user = await User.findOne({
+      where: { id: req.user.id },
+    });
+
+    const isOldPasswordValid = await bcrypt.compare(oldPassword, user.password);
+    if (!isOldPasswordValid)
+      return res.status(400).json({ message: 'Current password is incorrect' });
+
+    const hashNewPassword = await bcrypt.hash(newPassword, 12);
+
+    user.password = hashNewPassword;
+    await user.save();
+
+    return res.status(201).json({ message: 'Password changed successfully' });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ message: 'Server error', error });
+  }
+};
+
 module.exports = {
   login,
+  changePassword,
 };
