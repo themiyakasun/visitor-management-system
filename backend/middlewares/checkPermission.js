@@ -1,4 +1,4 @@
-const { User, Role, Permission, Tenant } = require('../models');
+const { User, Role } = require('../models');
 const { getUserPermissions } = require('../utils/helpers.js');
 
 const checkPermission = (requiredResouce, action) => {

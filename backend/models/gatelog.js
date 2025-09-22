@@ -20,7 +20,9 @@ module.exports = (sequelize, DataTypes) => {
       id: {
         type: DataTypes.UUID,
         defaultValue: DataTypes.UUIDV4,
+        allowNull: false,
         primaryKey: true,
+        unique: true,
       },
       type: {
         type: DataTypes.ENUM('in', 'out', 'breakExit', 'breakReentry'),

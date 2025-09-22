@@ -1,6 +1,7 @@
 const express = require('express');
 
 const { sequelize } = require('./models');
+const routes = require('./routes');
 
 require('dotenv').config();
 
@@ -18,6 +19,8 @@ app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).json({ error: 'Internal Server Error' });
 });
+
+app.use('/api/v1', routes);
 
 const PORT = process.env.PORT || 5000;
 
