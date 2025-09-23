@@ -8,8 +8,11 @@ const {
   bulkUploadPersons,
   updatePerson,
 } = require('../controllers/personController.js');
+const authMiddleware = require('../middlewares/authMiddleware.js');
 
 const router = express.Router();
+
+router.use(authMiddleware);
 
 router.post('/', createPerson);
 router.post('/bulk-upload', upload.single('file'), bulkUploadPersons);

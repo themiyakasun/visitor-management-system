@@ -7,8 +7,11 @@ const {
   updateDepartment,
   deleteDepartment,
 } = require('../controllers/departmentController.js');
+const authMiddleware = require('../middlewares/authMiddleware.js');
 
 const router = express.Router();
+
+router.use(authMiddleware);
 
 router.post('/', createDepartment);
 router.get('/', getDepartments);

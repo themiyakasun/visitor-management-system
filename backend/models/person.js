@@ -33,6 +33,11 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.STRING,
         allowNull: false,
       },
+      nic: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        unique: true,
+      },
       type: {
         type: DataTypes.ENUM('employee', 'driver', 'helper', 'visitor'),
       },

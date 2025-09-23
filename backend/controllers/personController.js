@@ -5,6 +5,7 @@ const { parseQueryParams } = require('../utils/helpers.js');
 const createPerson = async (req, res) => {
   const {
     name,
+    nic,
     type,
     phone,
     email,
@@ -20,6 +21,12 @@ const createPerson = async (req, res) => {
   try {
     if (!['employee', 'driver', 'helper', 'visitor'].includes(type))
       return res.status(400).json({ message: 'Invalid person type' });
+
+    const existingPerson = await Person.findOne({
+      where: { nic, tenantId: req.user.tenantId },
+    });
+    if (existingPerson)
+      return res.status(400).json({ message: 'Person already exists' });
 
     if (email) {
       const existing = await Person.findOne({ where: { email } });
@@ -44,6 +51,7 @@ const createPerson = async (req, res) => {
 
     const person = await Person.create({
       name,
+      nic,
       type,
       phone,
       email,
@@ -52,21 +60,26 @@ const createPerson = async (req, res) => {
       departmentId: type === 'employee' ? departmentId : null,
       companyName:
         type === 'visitor' || type === 'contractor' ? companyName : null,
-      purpose: type === 'vistor' ? purpose : null,
-      passType: passType,
+      purpose: purpose,
+      passType: type === 'employee' ? 'employee' : passType,
       passExpiryDate,
     });
 
-    if (type === 'driver' && vehicleData) {
-      await Vehicle.create({
-        ...vehicleData,
+    if (type === 'driver' && vehicleData.length > 0) {
+      const vehiclesToCreate = vehicleData.map((v) => ({
+        ...v,
         driverId: person.id,
         tenantId: req.user.tenantId,
-      });
+      }));
+
+      await Vehicle.bulkCreate(vehiclesToCreate);
     }
 
-    return res.status(201).json({ message: 'Person created successfully' });
+    return res
+      .status(201)
+      .json({ message: 'Person created successfully', person });
   } catch (error) {
+    console.log(error);
     return res.status(500).json({ message: 'Server error', error });
   }
 };
@@ -94,6 +107,7 @@ const bulkUploadPersons = async (req, res) => {
 
       const {
         name,
+        nic,
         type,
         phone,
         email,
@@ -144,6 +158,7 @@ const bulkUploadPersons = async (req, res) => {
       validPersons.push({
         tenantId: req.user.tenantId,
         name,
+        nic,
         type,
         phone,
         email,
@@ -251,6 +266,7 @@ const updatePerson = async (req, res) => {
   try {
     const {
       name,
+      nic,
       phone,
       email,
       address,
@@ -280,6 +296,7 @@ const updatePerson = async (req, res) => {
     }
 
     person.name = name;
+    person.nic = nic;
     person.phone = phone;
     person.email = email;
     person.address = address;
@@ -289,7 +306,7 @@ const updatePerson = async (req, res) => {
     person.companyName = companyName;
     person.purpose = purpose;
 
-    await person.update();
+    await person.save();
 
     return res
       .status(201)

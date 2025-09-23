@@ -123,12 +123,14 @@ const updateDepartment = async (req, res) => {
     if (!department)
       return res.status(404).json({ message: 'Department cannot be found' });
 
-    department.name = name;
-    department.description = description;
+    await Department.update(
+      { name, description },
+      { where: { id, tenantId: req.user.tenantId } }
+    );
 
-    await department.save();
-
-    return res.status(201).json({ message: 'Department updated successfully' });
+    return res
+      .status(201)
+      .json({ message: 'Department updated successfully', department });
   } catch (error) {
     return res.status(500).json({ message: 'Server error', error });
   }
