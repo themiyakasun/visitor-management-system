@@ -1,5 +1,5 @@
-const { where } = require('sequelize');
 const { Department } = require('../models');
+const { parseQueryParams } = require('../utils/helpers.js');
 
 const createDepartment = async (req, res) => {
   const { name, description, employeeList } = req.body;
@@ -144,7 +144,7 @@ const deleteDepartment = async (req, res) => {
     if (!isDepartmentExist)
       return res.status(404).json({ message: 'Department cannot be found' });
 
-    await Department.distroy({ where: { id, tenantId: req.user.tenantId } });
+    await Department.destroy({ where: { id, tenantId: req.user.tenantId } });
 
     return res.status(201).json({ message: 'Department deleted successfully' });
   } catch (error) {

@@ -225,7 +225,7 @@ const deleteUser = async (req, res) => {
         .status(400)
         .json({ message: 'Cannot delete your own account' });
 
-    await User.distroy({
+    await User.destroy({
       where: { id },
     });
 
