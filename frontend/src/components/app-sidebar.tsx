@@ -35,20 +35,20 @@ const data = {
       items: [
         {
           title: 'Departments',
-          url: '#',
+          url: '/departments',
         },
         {
-          title: 'Roles & Permissions',
-          url: '#',
+          title: 'Roles',
+          url: '/roles',
           isActive: true,
         },
         {
-          title: 'Break Types',
-          url: '#',
+          title: 'Permissions',
+          url: '/permissions',
         },
         {
-          title: 'System Users',
-          url: '#',
+          title: 'Users',
+          url: '/users',
         },
       ],
     },
