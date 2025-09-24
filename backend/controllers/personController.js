@@ -219,7 +219,14 @@ const getPersons = async (req, res) => {
       });
     }
 
-    return res.status(200).json(persons);
+    return res
+      .status(200)
+      .json({
+        page,
+        pageSize: limit,
+        persons,
+        totalPages: Math.ceil(count / limit),
+      });
   } catch (error) {
     return res.status(500).json({ message: 'Server error', error });
   }

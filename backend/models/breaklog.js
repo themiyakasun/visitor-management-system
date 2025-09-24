@@ -2,7 +2,8 @@
 const { Model } = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
   class Breaklog extends Model {
-    static associate({ Gatelog }) {
+    static associate({ Gatelog, Tenant }) {
+      this.belongsTo(Tenant, { foreignKey: 'tenantId', as: 'tenant' });
       this.belongsTo(Gatelog, { foreignKey: 'gateLogId', as: 'gateLog' });
     }
   }
