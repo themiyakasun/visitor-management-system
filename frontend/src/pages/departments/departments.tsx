@@ -14,9 +14,11 @@ import { Input } from '@/components/ui/input';
 import DepartmentTable from '@/components/tables/department-table';
 import { useDepartmentStore } from '@/stores/departmentStore';
 import { useEffect, useState } from 'react';
+import type { DepartmentPayload } from '@/index';
 
 const Departments = () => {
-  const { getAllDepartments, pagination, departments } = useDepartmentStore();
+  const { getAllDepartments, pagination, departments, createDepartment } =
+    useDepartmentStore();
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
   const [searchQuery, setSearchQuery] = useState('');
@@ -33,7 +35,9 @@ const Departments = () => {
     fetchData();
   }, [currentPage, itemsPerPage, searchQuery, getAllDepartments]);
 
-  const handleAdd = () => {};
+  const handleAdd = async (values: DepartmentPayload) => {
+    await createDepartment(values);
+  };
   return (
     <>
       <div className='flex items-center justify-between mb-6'>

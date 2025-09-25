@@ -22,3 +22,8 @@ export const changePasswordSchema = z
   .refine((data) => data.newPassword === data.confirmPassword, {
     message: "Passwords don't mathc",
   });
+
+export const departmentSchema = z.object({
+  name: z.string().min(3, { message: 'Name cannot be empty' }),
+  description: z.string(),
+});

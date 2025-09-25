@@ -2,9 +2,10 @@
 import { handleApiError } from '@/lib/error-handle';
 import { departmentSerives } from '@/services/department-services';
 import { create } from 'zustand';
-import type { DepartmentStore, ParamsPayload } from '..';
+import type { DepartmentPayload, DepartmentStore, ParamsPayload } from '..';
+import { toast } from 'sonner';
 
-export const useDepartmentStore = create<DepartmentStore>((set) => ({
+export const useDepartmentStore = create<DepartmentStore>((set, get) => ({
   departments: [],
   isLoading: false,
   pagination: {
@@ -34,6 +35,35 @@ export const useDepartmentStore = create<DepartmentStore>((set) => ({
       set({ isLoading: false });
       const message = handleApiError(error);
       console.log(message);
+      throw new Error(message);
+    }
+  },
+
+  getDepartmentReport: async (id: string) => {
+    set({ isLoading: true });
+
+    try {
+      const response = await departmentSerives.getDepartmentReport(id);
+      return response;
+    } catch (error) {
+      set({ isLoading: false });
+      const message = handleApiError(error);
+      throw new Error(message);
+    }
+  },
+
+  createDepartment: async (values: DepartmentPayload) => {
+    set({ isLoading: true });
+
+    try {
+      const response = await departmentSerives.createDepartment(values);
+      toast.success(response.data.message);
+      get().getAllDepartments({ page: 1, limit: 10, search: '' });
+      return response;
+    } catch (error) {
+      set({ isLoading: false });
+      const message = handleApiError(error);
+      toast.error(message);
       throw new Error(message);
     }
   },

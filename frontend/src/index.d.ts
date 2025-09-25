@@ -24,7 +24,7 @@ type ChangePasswordPayload = {
   oldPassword: string;
 };
 
-type Permisson = {
+type Permission = {
   id?: number;
   resource: string;
   action: string;
@@ -33,7 +33,7 @@ type Permisson = {
 interface AuthStore {
   user: UserData | null;
   token: string | null;
-  permissions: Permissions[];
+  permissions: Permission[];
   isAuthenticated: boolean;
   isLoading: boolean;
   login: (values: LoginPayload) => Promise<any>;
@@ -52,6 +52,8 @@ interface DepartmentStore {
     totalPages: number;
   };
   getAllDepartments: (params: ParamsPayload) => Promise<any>;
+  getDepartmentReport: (id: string) => Promise<any>;
+  createDepartment: (values: DepartmentPayload) => Promise<any>;
 }
 
 type ParamsPayload = {
@@ -67,4 +69,9 @@ type Department = {
   id: string;
   name: string;
   description: string;
+};
+
+type DepartmentPayload = {
+  name: string;
+  description?: string;
 };

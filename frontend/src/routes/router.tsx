@@ -5,6 +5,7 @@ import Unauthorized from '@/pages/auth/unauthorized';
 import Dashboard from '@/pages/dashboard/dashboard';
 import Departments from '@/pages/departments/departments';
 import Permissions from '@/pages/permissions/permissions';
+import ReportViewer from '@/pages/reports/report-viewer';
 import Roles from '@/pages/roles/roles';
 import Users from '@/pages/users/users';
 import RootLayout from '@/RootLayout';
@@ -24,6 +25,10 @@ const router = createBrowserRouter([
     Component: Unauthorized,
   },
   {
+    path: '/report-viewer',
+    Component: ReportViewer,
+  },
+  {
     path: '/',
     Component: RootLayout,
     children: [
@@ -37,7 +42,11 @@ const router = createBrowserRouter([
       },
       {
         path: '/departments',
-        element: <Departments />,
+        element: (
+          <ProtectedRoutes>
+            <Departments />
+          </ProtectedRoutes>
+        ),
       },
       {
         path: '/roles',

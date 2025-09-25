@@ -18,6 +18,8 @@ import {
 } from '../ui/pagination';
 import type { Department } from '@/index';
 import { ArrowDownToLine } from 'lucide-react';
+import { useDepartmentStore } from '@/stores/departmentStore';
+import { useNavigate } from 'react-router';
 
 const DepartmentTable = ({
   total,
@@ -33,6 +35,17 @@ const DepartmentTable = ({
   data: Department[];
 }) => {
   const totalPages = Math.ceil(total / pageSize);
+  const { getDepartmentReport } = useDepartmentStore();
+  const navigate = useNavigate();
+
+  const handleGenerateReport = async (id: string) => {
+    const response = await getDepartmentReport(id);
+    const blob = new Blob([response.data], { type: 'application/pdf' });
+    const url = window.URL.createObjectURL(blob);
+    console.log(url);
+    navigate(`/report-viewer?url=${encodeURIComponent(url)}`);
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -58,7 +71,7 @@ const DepartmentTable = ({
                     <Button variant='destructive' size='sm'>
                       Delete
                     </Button>
-                    <Button>
+                    <Button onClick={() => handleGenerateReport(department.id)}>
                       <ArrowDownToLine />
                     </Button>
                   </div>
