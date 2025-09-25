@@ -41,3 +41,30 @@ interface AuthStore {
   initializeAuth: () => Promise<void>;
   changePassword: (values: ChangePasswordPayload) => Promise<any>;
 }
+
+interface DepartmentStore {
+  departments: Department[];
+  isLoading: boolean;
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
+  getAllDepartments: (params: ParamsPayload) => Promise<any>;
+}
+
+type ParamsPayload = {
+  page: number;
+  limit: number;
+  sortBy?: any;
+  sortOrder?: any;
+  search: string;
+  offset?: number;
+};
+
+type Department = {
+  id: string;
+  name: string;
+  description: string;
+};

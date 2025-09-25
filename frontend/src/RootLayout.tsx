@@ -43,7 +43,9 @@ const RootLayout = () => {
             <ModeToggle />
           </div>
         </header>
-        <Outlet />
+        <div className='flex-1 p-6'>
+          <Outlet />
+        </div>
       </SidebarInset>
     </SidebarProvider>
   );

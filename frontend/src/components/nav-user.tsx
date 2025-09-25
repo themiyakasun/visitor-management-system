@@ -87,6 +87,11 @@ export function NavUser() {
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuItem>
+              <IconNotification />
+              Change Password
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem>
               <Button variant='ghost' onClick={handleLogout}>
                 <IconLogout />
                 Log out
