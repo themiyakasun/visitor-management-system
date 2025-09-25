@@ -1,3 +1,5 @@
+import ProtectedRoutes from '@/components/protected-routes/protected-routes';
+import ChangePassword from '@/pages/auth/change-password';
 import Login from '@/pages/auth/login';
 import Unauthorized from '@/pages/auth/unauthorized';
 import Dashboard from '@/pages/dashboard/dashboard';
@@ -14,6 +16,10 @@ const router = createBrowserRouter([
     Component: Login,
   },
   {
+    path: '/change-password',
+    Component: ChangePassword,
+  },
+  {
     path: '/unauthorized',
     Component: Unauthorized,
   },
@@ -23,7 +29,11 @@ const router = createBrowserRouter([
     children: [
       {
         path: '/',
-        element: <Dashboard />,
+        element: (
+          <ProtectedRoutes>
+            <Dashboard />
+          </ProtectedRoutes>
+        ),
       },
       {
         path: '/departments',
