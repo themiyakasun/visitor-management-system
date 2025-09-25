@@ -10,7 +10,16 @@ export const departmentSerives = {
   },
 
   getDepartmentReport: async (id: string) => {
-    const response = await api.get(`/departments/report/${id}`);
+    const response = await api.get(`/departments/report/${id}`, {
+      responseType: 'arraybuffer',
+    });
+    return response;
+  },
+
+  getAllDepartmentReports: async () => {
+    const response = await api.get('/departments/full-report', {
+      responseType: 'arraybuffer',
+    });
     return response;
   },
 
@@ -19,6 +28,11 @@ export const departmentSerives = {
       name: values.name,
       description: values.description,
     });
+    return response;
+  },
+
+  deleteDepartment: async (id: string) => {
+    const response = await api.delete(`/departments/${id}`);
     return response;
   },
 };

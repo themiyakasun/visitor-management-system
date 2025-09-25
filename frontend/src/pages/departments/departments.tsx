@@ -15,10 +15,17 @@ import DepartmentTable from '@/components/tables/department-table';
 import { useDepartmentStore } from '@/stores/departmentStore';
 import { useEffect, useState } from 'react';
 import type { DepartmentPayload } from '@/index';
+import { useNavigate } from 'react-router';
 
 const Departments = () => {
-  const { getAllDepartments, pagination, departments, createDepartment } =
-    useDepartmentStore();
+  const {
+    getAllDepartments,
+    pagination,
+    departments,
+    createDepartment,
+    getAllDepartmentsReport,
+  } = useDepartmentStore();
+  const navigate = useNavigate();
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
   const [searchQuery, setSearchQuery] = useState('');
@@ -34,6 +41,14 @@ const Departments = () => {
 
     fetchData();
   }, [currentPage, itemsPerPage, searchQuery, getAllDepartments]);
+
+  const generateReport = async () => {
+    const response = await getAllDepartmentsReport();
+    const blob = new Blob([response.data], { type: 'application/pdf' });
+    const url = window.URL.createObjectURL(blob);
+    console.log(url);
+    navigate(`/report-viewer?url=${encodeURIComponent(url)}`);
+  };
 
   const handleAdd = async (values: DepartmentPayload) => {
     await createDepartment(values);
@@ -61,7 +76,7 @@ const Departments = () => {
             </DialogContent>
           </Dialog>
 
-          <Button>
+          <Button onClick={generateReport}>
             <ArrowDownToLine />
             Export
           </Button>

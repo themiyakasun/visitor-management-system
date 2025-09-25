@@ -52,11 +52,39 @@ export const useDepartmentStore = create<DepartmentStore>((set, get) => ({
     }
   },
 
+  getAllDepartmentsReport: async () => {
+    set({ isLoading: true });
+    try {
+      const response = await departmentSerives.getAllDepartmentReports();
+      return response;
+    } catch (error) {
+      set({ isLoading: false });
+      const message = handleApiError(error);
+      throw new Error(message);
+    }
+  },
+
   createDepartment: async (values: DepartmentPayload) => {
     set({ isLoading: true });
 
     try {
       const response = await departmentSerives.createDepartment(values);
+      toast.success(response.data.message);
+      get().getAllDepartments({ page: 1, limit: 10, search: '' });
+      return response;
+    } catch (error) {
+      set({ isLoading: false });
+      const message = handleApiError(error);
+      toast.error(message);
+      throw new Error(message);
+    }
+  },
+
+  deleteDepartment: async (id: string) => {
+    set({ isLoading: true });
+
+    try {
+      const response = await departmentSerives.deleteDepartment(id);
       toast.success(response.data.message);
       get().getAllDepartments({ page: 1, limit: 10, search: '' });
       return response;

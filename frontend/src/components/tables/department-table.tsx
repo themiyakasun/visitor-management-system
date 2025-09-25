@@ -35,7 +35,7 @@ const DepartmentTable = ({
   data: Department[];
 }) => {
   const totalPages = Math.ceil(total / pageSize);
-  const { getDepartmentReport } = useDepartmentStore();
+  const { getDepartmentReport, deleteDepartment } = useDepartmentStore();
   const navigate = useNavigate();
 
   const handleGenerateReport = async (id: string) => {
@@ -44,6 +44,11 @@ const DepartmentTable = ({
     const url = window.URL.createObjectURL(blob);
     console.log(url);
     navigate(`/report-viewer?url=${encodeURIComponent(url)}`);
+  };
+
+  const handleDelete = async (id: string) => {
+    const isConfirmed = confirm('Sure want to delete this department');
+    if (isConfirmed) await deleteDepartment(id);
   };
 
   return (
@@ -68,7 +73,11 @@ const DepartmentTable = ({
                 <TableCell>
                   <div className='flex gap-2 items-center'>
                     <Button size='sm'>Edit</Button>
-                    <Button variant='destructive' size='sm'>
+                    <Button
+                      variant='destructive'
+                      size='sm'
+                      onClick={() => handleDelete(department.id)}
+                    >
                       Delete
                     </Button>
                     <Button onClick={() => handleGenerateReport(department.id)}>

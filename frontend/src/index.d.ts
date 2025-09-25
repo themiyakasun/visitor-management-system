@@ -54,6 +54,8 @@ interface DepartmentStore {
   getAllDepartments: (params: ParamsPayload) => Promise<any>;
   getDepartmentReport: (id: string) => Promise<any>;
   createDepartment: (values: DepartmentPayload) => Promise<any>;
+  getAllDepartmentsReport: () => Promise<any>;
+  deleteDepartment: (id: string) => Promise<any>;
 }
 
 type ParamsPayload = {
