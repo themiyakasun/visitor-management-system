@@ -58,6 +58,63 @@ interface DepartmentStore {
   deleteDepartment: (id: string) => Promise<any>;
 }
 
+interface RoleStore {
+  roles: Role[];
+  isLoading: boolean;
+  getAllRoles: () => Promise<any>;
+  getRoleById: (id: string) => Promise<any>;
+  createRole: (values: RolePayload) => Promise<any>;
+  updateRole: ({
+    values,
+    id,
+  }: {
+    values: RolePayload;
+    id: string;
+  }) => Promise<any>;
+  deleteRole: (id: string) => Promise<any>;
+}
+
+interface UserStore {
+  users: User[];
+  isLoading: boolean;
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
+  getUsers: (params: ParamsPayload) => Promise<any>;
+  getUserById: (id: string) => Promise<any>;
+  createUser: (payload: UserPayload) => Promise<any>;
+  updateUser: ({
+    id,
+    payload,
+  }: {
+    id: string;
+    payload: UserPayload;
+  }) => Promise<any>;
+  deleteUser: (id: string) => Promise<any>;
+}
+
+interface PermissionStore {
+  permissions: Permission[];
+  isLoading: boolean;
+  createPermission: (payload: PermissionPayload) => Prmoise<any>;
+  getAllPermissions: () => Promise<any>;
+  updatePermission: ({
+    id,
+    payload,
+  }: {
+    id: number;
+    payload: PermissionPayload;
+  }) => Promise<any>;
+  deletePermission: (id: number) => Promise<any>;
+  assignRolePermissions: (payload: RolePermissionPayload) => Promise<any>;
+  assignUserPermissions: (payload: UserPermissionPayload) => Promise<any>;
+  removeUserPermissions: (payload: UserPermissionPayload) => Promise<any>;
+  removeRolePermissions: (payload: RolePermissionPayload) => Promise<any>;
+}
+
 type ParamsPayload = {
   page: number;
   limit: number;
@@ -76,4 +133,44 @@ type Department = {
 type DepartmentPayload = {
   name: string;
   description?: string;
+};
+
+type RolePayload = {
+  name: string;
+};
+
+type Role = {
+  id: string;
+  name: string;
+  permissions: Permission[];
+};
+
+type UserPayload = {
+  name: string;
+  email: string;
+  password: string;
+  roleNames?: string[];
+};
+
+type User = {
+  id: string;
+  name: string;
+  email: string;
+  roles: Role[];
+  permissions: Permission[];
+};
+
+type PermissionPayload = {
+  resource: string;
+  action: string;
+};
+
+type RolePermissionPayload = {
+  roleId: string;
+  permissionId: number;
+};
+
+type UserPermissionPayload = {
+  userId: string;
+  permissionId: number;
 };

@@ -51,6 +51,17 @@ const DepartmentTable = ({
     if (isConfirmed) await deleteDepartment(id);
   };
 
+  if (!data || data.length === 0) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Departments List</CardTitle>
+        </CardHeader>
+        <CardContent>No departments found.</CardContent>
+      </Card>
+    );
+  }
+
   return (
     <Card>
       <CardHeader>

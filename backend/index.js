@@ -1,4 +1,5 @@
 const express = require('express');
+const cors = require('cors');
 
 const { sequelize } = require('./models');
 const routes = require('./routes');
@@ -8,6 +9,12 @@ require('dotenv').config();
 const app = express();
 
 app.use(express.json());
+app.use(
+  cors({
+    origin: 'http://localhost:5173',
+    credentials: true,
+  })
+);
 
 // Health check endpoint
 app.get('/health', (req, res) => {

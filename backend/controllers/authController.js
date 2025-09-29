@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
-const { User } = require('../models');
+const { User, Role, Permission, Tenant } = require('../models');
 const { getUserPermissions } = require('../utils/helpers.js');
 
 const generateToken = ({ userId, tenantId }) => {
@@ -15,7 +15,31 @@ const login = async (req, res) => {
   try {
     const user = await User.findOne({
       where: { email },
-      include: ['roles', 'permissions', 'tenant'],
+      include: [
+        {
+          model: Role,
+          as: 'roles',
+          include: [
+            {
+              model: Permission,
+              as: 'permissions',
+              attributes: ['resource', 'action'],
+              through: { attributes: [] },
+            },
+          ],
+          through: { attributes: [] },
+        },
+        {
+          model: Permission,
+          as: 'permissions',
+          attributes: ['resource', 'action'],
+          through: { attributes: [] },
+        },
+        {
+          model: Tenant,
+          as: 'tenant',
+        },
+      ],
     });
 
     if (!user)
@@ -23,14 +47,14 @@ const login = async (req, res) => {
         .status(404)
         .json({ message: 'User cannot be found for this email' });
 
-    const isPasswordMatch = bcrypt.compare(password, user.password);
+    const isPasswordMatch = await bcrypt.compare(password, user.password);
     if (!isPasswordMatch)
       return res.status(401).json({ message: 'Invalid credentials' });
 
     const token = generateToken({ userId: user.id, tenantId: user.tenant.id });
     const userPermissions = getUserPermissions(user);
 
-    return res.status(200).json({
+    return res.status(200).header('Authorization', `Bearer ${token}`).json({
       message: 'Login successfull',
       data: {
         user,

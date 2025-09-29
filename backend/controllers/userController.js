@@ -10,16 +10,18 @@ const createUser = async (req, res) => {
     password,
     roleNames = [],
     permissionData = [],
-    tenantId,
   } = req.body;
 
   try {
-    const isExist = await User.findOne({ where: { email } });
+    const isExist = await User.findOne({
+      where: { email, tenantId: req.user.tenantId },
+    });
     if (isExist)
       return res
         .status(400)
         .json({ message: 'User already exists with this email' });
 
+    console.log('Role Names:' + roleNames);
     let permissions = [];
     let roles = [];
 
@@ -57,7 +59,7 @@ const createUser = async (req, res) => {
       name,
       email,
       password: hashedPassword,
-      tenantId,
+      tenantId: req.user.tenantId,
     });
 
     // Associate roles and permissions
@@ -93,7 +95,7 @@ const getUsers = async (req, res) => {
       : {};
 
     const { count, rows } = await User.findAndCountAll({
-      where: whereCondition,
+      where: { tenantId: req.user.tenantId, ...whereCondition },
       include: ['roles', 'permissions'],
       order: [[sortBy, sortOrder]],
       limit,
@@ -101,14 +103,18 @@ const getUsers = async (req, res) => {
     });
 
     return res.status(200).json({
-      total: count,
+      total: count - 1,
       page,
       pageSize: limit,
       totalPages: Math.ceil(count / limit),
       users: rows,
     });
   } catch (error) {
-    return res.status(500).json({ message: 'Server error', error });
+    console.error('GetUsers error:', error);
+    return res.status(500).json({
+      message: 'Server error',
+      error: error.message,
+    });
   }
 };
 

@@ -19,7 +19,7 @@ const createRole = async (req, res) => {
 
 const getRoles = async (req, res) => {
   try {
-    const roles = await Role.findAll({});
+    const roles = await Role.findAll({ include: 'permissions' });
 
     return res.status(200).json(roles);
   } catch (error) {
