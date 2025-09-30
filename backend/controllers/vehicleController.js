@@ -1,4 +1,4 @@
-const { where } = require('sequelize');
+const { Op } = require('sequelize');
 const { Vehicle, Person } = require('../models');
 const { parseQueryParams } = require('../utils/helpers.js');
 
@@ -28,6 +28,7 @@ const createVehicle = async (req, res) => {
       .status(201)
       .json({ message: 'Vehicle created successfully', vehicle });
   } catch (error) {
+    console.log(error);
     return res.status(500).json({ message: 'Server error', error });
   }
 };
@@ -44,7 +45,7 @@ const getAllVehicles = async (req, res) => {
         }
       : {};
 
-    const vehicles = await Vehicle.findAll({
+    const { count, rows } = await Vehicle.findAndCountAll({
       where: { tenantId: req.user.tenantId, ...whereCondition },
       include: ['driver', 'tenant', 'gateLogs'],
       order: [[sortBy, sortOrder]],
@@ -53,12 +54,14 @@ const getAllVehicles = async (req, res) => {
     });
 
     return res.status(201).json({
-      vehicles,
+      vehicles: rows,
       page,
       pageSize: limit,
       totalPages: Math.ceil(count / limit),
+      total: count,
     });
   } catch (error) {
+    console.log(error);
     return res.status(500).json({ message: 'Server error', error });
   }
 };

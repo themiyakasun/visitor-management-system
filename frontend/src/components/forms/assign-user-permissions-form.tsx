@@ -26,7 +26,8 @@ import {
 
 const AssignUserPermissionsForm = () => {
   const { users, getUsers } = useUserStore();
-  const { permissions, getAllPermissions } = usePermissionStore();
+  const { permissions, getAllPermissions, assignUserPermissions } =
+    usePermissionStore();
   const form = useForm({
     resolver: zodResolver(userPermissionSchema),
     defaultValues: {
@@ -68,7 +69,16 @@ const AssignUserPermissionsForm = () => {
   }, [permissions, watchedResource]);
 
   const onSubmit = async (values: z.infer<typeof userPermissionSchema>) => {
-    console.log(values);
+    const selected = permissions.find(
+      (p) => p.resource === values.resource && p.action === values.action
+    );
+
+    if (selected) {
+      await assignUserPermissions({
+        userId: values.userId,
+        permissionId: selected.id!,
+      });
+    }
   };
 
   return (

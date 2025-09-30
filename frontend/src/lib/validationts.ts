@@ -62,3 +62,47 @@ export const rolePermissionSchema = z.object({
   resource: z.string().min(3, { message: 'Resource is required' }),
   action: z.string().min(3, { message: 'Action is required' }),
 });
+
+export const personSchema = z.object({
+  name: z.string().min(2, 'Name is required'),
+  nic: z.string().min(5, 'NIC is required'),
+  type: z.enum(['employee', 'driver', 'helper', 'visitor']),
+  phone: z
+    .string()
+    .regex(/^[0-9]{10,15}$/, 'Phone must be 10-15 digits')
+    .optional()
+    .or(z.literal('')), // allow empty string
+  email: z.string().email('Invalid email').optional().or(z.literal('')),
+  address: z.string().optional(),
+  departmentId: z.string().optional(),
+  companyName: z.string().optional(),
+  purpose: z.string().optional(),
+  passType: z.string().optional(),
+  passExpiryDate: z
+    .string()
+    .optional()
+    .refine(
+      (date) => !date || new Date(date) > new Date(),
+      'Pass expiry must be in the future'
+    ),
+});
+
+export const vehicleSchema = z.object({
+  numberPlate: z.string().min(2, 'Number plate is required'),
+  type: z.string().optional(),
+  make: z.string().optional(),
+  model: z.string().optional(),
+  color: z.string().optional(),
+  passExpiryDate: z.string().optional(),
+  driverId: z.string().min(1, 'Driver is required'),
+});
+
+export const appointmentSchema = z.object({
+  datetime: z.string().min(1, 'Date and time is required'),
+  purpose: z.string().min(1, 'Purpose is required'),
+  expectedDuration: z
+    .number({ message: 'Expected duration must be a number' })
+    .min(1, 'Duration must be at least 1 minute'),
+  visitorId: z.string().optional(),
+  employeeId: z.string().optional(),
+});

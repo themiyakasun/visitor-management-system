@@ -1,6 +1,7 @@
 const xlsx = require('xlsx');
 const { Person, Vehicle, Department } = require('../models');
 const { parseQueryParams } = require('../utils/helpers.js');
+const { Op } = require('sequelize');
 
 const createPerson = async (req, res) => {
   const {
@@ -19,6 +20,7 @@ const createPerson = async (req, res) => {
   } = req.body;
 
   try {
+    console.log(type);
     if (!['employee', 'driver', 'helper', 'visitor'].includes(type))
       return res.status(400).json({ message: 'Invalid person type' });
 
@@ -209,25 +211,25 @@ const getPersons = async (req, res) => {
       offset,
     };
 
-    let persons;
+    let personsData;
     if (type === 'all') {
-      persons = await Person.findAll(baseQuery);
+      personsData = await Person.findAndCountAll({ ...baseQuery });
     } else {
-      persons = await Person.findAll({
+      personsData = await Person.findAndCountAll({
         ...baseQuery,
         where: { type, tenantId: req.user.tenantId, ...whereCondition },
       });
     }
 
-    return res
-      .status(200)
-      .json({
-        page,
-        pageSize: limit,
-        persons,
-        totalPages: Math.ceil(count / limit),
-      });
+    return res.status(200).json({
+      total: personsData.count - 1,
+      page,
+      pageSize: limit,
+      persons: personsData.rows,
+      totalPages: Math.ceil(personsData.count / limit),
+    });
   } catch (error) {
+    console.log(error);
     return res.status(500).json({ message: 'Server error', error });
   }
 };

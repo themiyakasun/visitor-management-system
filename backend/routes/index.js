@@ -9,6 +9,7 @@ const gatelogRoutes = require('./gateRoutes.js');
 const roleRoutes = require('./roleRoutes.js');
 const shiftRoutes = require('./shiftRoutes.js');
 const permissionRoutes = require('./permissionRoutes.js');
+const appointmentRoutes = require('./appointmentRoutes.js');
 
 const router = express.Router();
 
@@ -21,5 +22,6 @@ router.use('/gatelogs', gatelogRoutes);
 router.use('/roles', roleRoutes);
 router.use('/shifts', shiftRoutes);
 router.use('/permissions', permissionRoutes);
+router.use('/appointments', appointmentRoutes);
 
 module.exports = router;

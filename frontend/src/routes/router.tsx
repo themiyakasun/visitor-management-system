@@ -1,13 +1,16 @@
 import ProtectedRoutes from '@/components/protected-routes/protected-routes';
+import Appointments from '@/pages/appointments/appointments';
 import ChangePassword from '@/pages/auth/change-password';
 import Login from '@/pages/auth/login';
 import Unauthorized from '@/pages/auth/unauthorized';
 import Dashboard from '@/pages/dashboard/dashboard';
 import Departments from '@/pages/departments/departments';
 import Permissions from '@/pages/permissions/permissions';
+import Persons from '@/pages/persons/persons';
 import ReportViewer from '@/pages/reports/report-viewer';
 import Roles from '@/pages/roles/roles';
 import Users from '@/pages/users/users';
+import Vehicles from '@/pages/vehicles/vehicles';
 import RootLayout from '@/RootLayout';
 import { createBrowserRouter } from 'react-router';
 
@@ -59,6 +62,18 @@ const router = createBrowserRouter([
       {
         path: 'users',
         element: <Users />,
+      },
+      {
+        path: '/persons',
+        element: <Persons />,
+      },
+      {
+        path: '/vehicles',
+        element: <Vehicles />,
+      },
+      {
+        path: '/appointments',
+        element: <Appointments />,
       },
     ],
   },

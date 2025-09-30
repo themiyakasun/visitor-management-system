@@ -6,8 +6,6 @@ const createAppointment = async (req, res) => {
     datetime,
     purpose,
     expectedDuration,
-    actualArrival,
-    actualDeparture,
     visitorId,
     employeeId,
     visitorDetails = [],
@@ -16,7 +14,7 @@ const createAppointment = async (req, res) => {
     let visitor;
 
     const isVisitorExists = await Person.findOne({
-      where: { nic: visitorDetails.nic, tenantId: req.user.tenantId },
+      where: { id: visitorId, tenantId: req.user.tenantId },
     });
 
     if (!isVisitorExists) {
@@ -37,20 +35,26 @@ const createAppointment = async (req, res) => {
       });
     }
 
+    function toDateOrNull(value) {
+      if (!value) return null;
+      const date = new Date(value);
+      return isNaN(date.getTime()) ? null : date.toISOString();
+    }
+
     const appointment = await Appointment.create({
-      datetime,
+      datetime: toDateOrNull(datetime),
       purpose,
       expectedDuration,
-      actualArrival,
-      actualDeparture,
-      visitorId: visitor ? visitor.id : visitorId,
-      employeeId,
+      visitorId: visitorId ? visitorId : visitor.id,
+      employeeId: employeeId ? employeeId : null,
+      tenantId: req.user.tenantId,
     });
 
     return res
       .status(201)
       .json({ message: 'Appointment created successfully', appointment });
   } catch (error) {
+    console.log(error);
     return res.status(500).json({ message: 'Server error', error });
   }
 };
@@ -70,7 +74,7 @@ const getAllAppointments = async (req, res) => {
         }
       : {};
 
-    const appointments = await Appointment.findAll({
+    const { count, rows } = await Appointment.findAndCountAll({
       where: { tenantId: req.user.tenantId, ...whereCondition },
       include: ['visitor', 'employee'],
       order: [[sortBy, sortOrder]],
@@ -80,12 +84,14 @@ const getAllAppointments = async (req, res) => {
 
     return res.status(201).json({
       message: 'Appointment created',
-      appointments,
+      appointments: rows,
       page,
       pageSize: limit,
       totalPages: Math.ceil(count / limit),
+      total: count,
     });
   } catch (error) {
+    console.log(error);
     return res.status(500).json({ message: 'Server error', error });
   }
 };
@@ -124,23 +130,36 @@ const updateAppointment = async (req, res) => {
     if (!isAppointmentExists)
       return res.status(404).json({ message: 'Appointment cannot be found' });
 
-    const updatedAppointment = await Appointment.update(
-      {
+    const payload = Object.fromEntries(
+      Object.entries({
         datetime,
         status,
         purpose,
         expectedDuration,
         actualArrival,
         notificationSent,
-      },
-      { where: { id, tenantId: req.user.tenantId } }
+      }).filter(([_, v]) => v != null && v !== '')
     );
+
+    if (Object.keys(payload).length === 0) {
+      return res.status(400).json({ message: 'No valid fields provided' });
+    }
+
+    const [affectedRows] = await Appointment.update(payload, {
+      where: { id, tenantId: req.user.tenantId },
+    });
+
+    if (affectedRows === 0) {
+      return res
+        .status(404)
+        .json({ message: 'Appointment not found or not updated' });
+    }
 
     return res.status(201).json({
       message: 'Appointment updated successfully',
-      updatedAppointment,
     });
   } catch (error) {
+    console.log(error);
     return res.status(500).json({ message: 'Server error', error });
   }
 };

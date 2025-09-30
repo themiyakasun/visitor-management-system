@@ -2,7 +2,15 @@
 const { Model } = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
   class Tenant extends Model {
-    static associate({ User, Department, Person, Vehicle, Gatelog, Breaklog }) {
+    static associate({
+      User,
+      Department,
+      Person,
+      Vehicle,
+      Gatelog,
+      Breaklog,
+      Appointment,
+    }) {
       this.hasMany(Gatelog, { foreignKey: 'tenantId', as: 'gatelogs' });
 
       this.hasMany(Breaklog, { foreignKey: 'tenantId', as: 'breaklogs' });
@@ -14,6 +22,8 @@ module.exports = (sequelize, DataTypes) => {
       this.hasMany(Person, { foreignKey: 'tenantId', as: 'persons' });
 
       this.hasMany(Vehicle, { foreignKey: 'tenantId', as: 'vehicles' });
+
+      this.hasMany(Appointment, { foreignKey: 'tenantId', as: 'appointments' });
     }
   }
   Tenant.init(

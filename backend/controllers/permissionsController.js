@@ -107,10 +107,10 @@ const assignPermissionToUser = async (req, res) => {
   try {
     const { userId, permissionId } = req.body;
 
-    const user = await User.findByPk({ where: { id: userId } });
+    const user = await User.findOne({ where: { id: userId } });
     if (!user) return res.status(404).json({ message: 'User not found' });
 
-    const permission = await Permission.findByPk({
+    const permission = await Permission.findOne({
       where: { id: permissionId },
     });
     if (!permission)

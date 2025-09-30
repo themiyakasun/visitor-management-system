@@ -16,7 +16,7 @@ router.use(authMiddleware);
 
 router.post('/', createPerson);
 router.post('/bulk-upload', upload.single('file'), bulkUploadPersons);
-router.get('/', getPersons);
+router.get('/:type', getPersons);
 router.get('/:id', getPersonById);
 router.delete('/:id', deletePerson);
 router.put('/:id', updatePerson);

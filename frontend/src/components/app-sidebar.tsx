@@ -53,19 +53,19 @@ const data = {
       items: [
         {
           title: 'Persons',
-          url: '#',
+          url: '/persons',
         },
         {
           title: 'Vehicles',
-          url: '#',
+          url: '/vehicles',
         },
         {
-          title: 'Appoinments',
-          url: '#',
+          title: 'Appointments',
+          url: '/appointments',
         },
         {
           title: 'Gate Logs',
-          url: '#',
+          url: '/gate-logs',
         },
       ],
     },

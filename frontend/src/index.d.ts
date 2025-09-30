@@ -115,6 +115,54 @@ interface PermissionStore {
   removeRolePermissions: (payload: RolePermissionPayload) => Promise<any>;
 }
 
+interface PersonStore {
+  persons: Person[];
+  isLoading: boolean;
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
+  getAllPersons: (params: ParamsPayload) => Promise<any>;
+  createPerson: (payload: PersonPayload) => Promise<any>;
+  deletePerson: (id: string) => Promise<any>;
+}
+
+interface VehicleStore {
+  vehicles: Vehicle[];
+  isLoading: boolean;
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
+  getAllVehicles: (params: ParamsPayload) => Promise<any>;
+  createVehicle: (payload: VehiclePayload) => Promise<any>;
+  deleteVehicle: (id: string) => Promise<any>;
+}
+
+interface AppointmentStore {
+  appointments: Appointment[];
+  isLoading: boolean;
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
+  getAllAppointments: (params: ParamsPayload) => Promise<any>;
+  createAppointment: (payload: AppointmentPayload) => Promise<any>;
+  updateAppointment: ({
+    payload,
+    id,
+  }: {
+    payload: AppointmentUpdatePayload;
+    id: string;
+  }) => Promise<any>;
+}
+
 type ParamsPayload = {
   page: number;
   limit: number;
@@ -122,6 +170,7 @@ type ParamsPayload = {
   sortOrder?: any;
   search: string;
   offset?: number;
+  type?: string;
 };
 
 type Department = {
@@ -173,4 +222,90 @@ type RolePermissionPayload = {
 type UserPermissionPayload = {
   userId: string;
   permissionId: number;
+};
+
+export type PersonType = 'employee' | 'driver' | 'helper' | 'visitor';
+
+export type PassType = 'employee' | 'driverPass' | 'helperPass' | 'visitorPass';
+
+type Person = {
+  id: string;
+  name: string;
+  type?: PersonType | null;
+  passType?: PassType | null;
+  phone?: string | null;
+  email?: string | null;
+  address?: string | null;
+  photoUrl?: string | null;
+  passExpiryDate?: Date | null;
+  isActive?: boolean;
+  companyName?: string | null;
+  purpose?: string | null;
+  nic?: string | null;
+};
+
+export type PersonPayload = {
+  name: string;
+  email?: string;
+  type: PersonType;
+  departmentId?: string;
+  phone?: string;
+  address?: string;
+  nic: string;
+  companyName?: string;
+  purpose?: string;
+  passExpiryDate?: string;
+  passType?: string;
+};
+
+export type Vehicle = {
+  id: string;
+  numberPlate: string;
+  type?: string;
+  make?: string;
+  model?: string;
+  color?: string;
+  passExpiryDate?: string;
+  isActive: boolean;
+  driver: Person;
+};
+
+export type VehiclePayload = {
+  numberPlate: string;
+  type?: string;
+  make?: string;
+  model?: string;
+  color?: string;
+  passExpiryDate?: string;
+  driverId: string;
+};
+
+export type Appointment = {
+  id: string;
+  datetime: string;
+  purpose: string;
+  expectedDuration: number;
+  actualArrival: string;
+  actualDeparture: string;
+  visitorId: string;
+  employeeId?: string;
+  visitor: Person;
+  employee: Person;
+  status: string;
+};
+
+export type AppointmentPayload = {
+  datetime: string;
+  purpose: string;
+  expectedDuration: number;
+  visitorId?: string;
+  employeeId?: string;
+  visitorDetails?: Person;
+};
+
+export type AppointmentUpdatePayload = {
+  datetime?: string;
+  status?: string;
+  purpose?: string;
+  expectedDuration?: string;
 };
