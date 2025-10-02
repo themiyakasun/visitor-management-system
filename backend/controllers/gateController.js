@@ -1,4 +1,5 @@
 const { Op } = require('sequelize');
+const PDFDocument = require('pdfkit');
 const { Gatelog, Breaklog, Person, Vehicle, Shift } = require('../models');
 const { parseQueryParams } = require('../utils/helpers.js');
 
@@ -117,10 +118,12 @@ const getTodayActivity = async (req, res) => {
     const startOfDay = new Date(today.setHours(0, 0, 0, 0));
     const endOfDay = new Date(today.setHours(23, 59, 59, 999));
 
-    const activity = await Gatelog.findAll({
-      where: tenantId,
-      timestamp: {
-        [Op.between]: [startOfDay, endOfDay],
+    const { count, rows } = await Gatelog.findAndCountAll({
+      where: {
+        tenantId: req.user.tenantId,
+        timestamp: {
+          [Op.between]: [startOfDay, endOfDay],
+        },
       },
       include: ['person', 'vehicle'],
       order: [[sortBy || 'createdAt', sortOrder || 'DESC']],
@@ -129,14 +132,318 @@ const getTodayActivity = async (req, res) => {
     });
 
     return res.status(200).json({
-      activity,
+      activity: rows,
       page,
       pageSize: limit,
       totalPages: Math.ceil(count / limit),
+      count,
     });
   } catch (error) {
+    console.log(error);
     return res.status(500).json({ message: 'Server error', error });
   }
 };
 
-module.exports = { recordGateAction, getTodayActivity };
+const getAllActivities = async (req, res) => {
+  try {
+    const { page, limit, sortBy, sortOrder, offset } = parseQueryParams(
+      req.query
+    );
+
+    const { count, rows } = await Gatelog.findAndCountAll({
+      where: { tenantId: req.user.tenantId },
+      include: ['person', 'vehicle'],
+      order: [[sortBy || 'createdAt', sortOrder || 'DESC']],
+      limit,
+      offset,
+    });
+
+    return res.status(200).json({
+      activity: rows,
+      page,
+      pageSize: limit,
+      totalPages: Math.ceil(count / limit),
+      count,
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ message: 'Server error', error });
+  }
+};
+
+const generateActiveReport = async (req, res) => {
+  try {
+    const {
+      fromDate,
+      toDate,
+      type,
+      personId,
+      vehicleId,
+      timeGap,
+      format,
+      page,
+      limit,
+    } = req.query;
+
+    const where = {
+      tenantId: req.user.tenantId,
+    };
+
+    if (type) {
+      where.type = type;
+    } else {
+      where.type = 'in';
+    }
+
+    if (fromDate && toDate) {
+      where.timestamp = {
+        [Op.between]: [new Date(fromDate), new Date(toDate)],
+      };
+    } else if (fromDate) {
+      where.timestamp = { [Op.gte]: new Date(fromDate) };
+    } else if (toDate) {
+      where.timestamp = { [Op.lte]: new Date(toDate) };
+    }
+
+    if (personId) {
+      where.personId = personId;
+    }
+
+    if (vehicleId) {
+      where.vehicleId = vehicleId;
+    }
+
+    let gateLogs = await Gatelog.findAndCountAll({
+      where,
+      include: [
+        {
+          model: Person,
+          as: 'person',
+        },
+        { model: Vehicle, as: 'vehicle', attributes: ['id', 'numberPlate'] },
+      ],
+      order: [['timestamp', 'ASC']],
+      limit: parseInt(limit),
+    });
+
+    if (timeGap) {
+      const hoursGap = parseInt(timeGap, 10);
+      gateLogs.rows = gateLogs.rows.filter((log, index, arr) => {
+        if (index === 0) return true;
+        const prev = arr[index - 1];
+        const diffHours =
+          (new Date(log.timestamp) - new Date(prev.timestamp)) / 36e5;
+        return diffHours >= hoursGap;
+      });
+    }
+
+    if (!gateLogs.rows.length) {
+      return res.status(404).json({ message: 'No active records found' });
+    }
+
+    if (format === 'json') {
+      return res.json({
+        success: true,
+        total: gateLogs.count,
+        page,
+        pageSize: limit,
+        gateLogs: gateLogs.rows,
+        totalPages: Math.ceil(gateLogs.count / limit),
+      });
+    }
+
+    // Generate PDF
+    const date = new Date().toLocaleDateString();
+    const doc = new PDFDocument({ margin: 50 });
+    res.header('Content-Type', 'application/pdf');
+    res.setHeader(
+      'Content-Disposition',
+      `attachment; filename="active-report-${date}.pdf"`
+    );
+    doc.pipe(res);
+
+    // Report Title
+    doc
+      .fontSize(18)
+      .text(`Active Report - ${date}`, { align: 'center' })
+      .moveDown();
+
+    // Table headers
+    doc.fontSize(12).text('Person', 50, 120);
+    doc.text('Vehicle', 200, 120);
+    doc.text('Action Type', 300, 120);
+    doc.text('Timestamp', 400, 120);
+
+    // Divider
+    doc.moveTo(50, 140).lineTo(550, 140).stroke();
+
+    // Table content
+    let y = 160;
+    const itemSpacing = 20;
+    gateLogs.rows.forEach((log) => {
+      doc.text(log.person ? log.person.name : '-', 50, y);
+      doc.text(log.vehicle ? log.vehicle.plateNumber : '-', 200, y);
+      doc.text(log.type, 300, y);
+      doc.text(new Date(log.timestamp).toLocaleString(), 400, y);
+      y += itemSpacing;
+    });
+
+    doc.end();
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: 'Server error', error });
+  }
+};
+
+const generateInOutReport = async (req, res) => {
+  try {
+    const {
+      fromDate,
+      toDate,
+      personId,
+      vehicleId,
+      timeGap,
+      format,
+      page = 1,
+      limit = 50,
+    } = req.query;
+
+    const where = { tenantId: req.user.tenantId };
+
+    // Date filtering
+    if (fromDate && toDate) {
+      where.timestamp = {
+        [Op.between]: [new Date(fromDate), new Date(toDate)],
+      };
+    } else if (fromDate) {
+      where.timestamp = { [Op.gte]: new Date(fromDate) };
+    } else if (toDate) {
+      where.timestamp = { [Op.lte]: new Date(toDate) };
+    }
+
+    if (personId) where.personId = personId;
+    if (vehicleId) where.vehicleId = vehicleId;
+
+    // Fetch both "in" and "out" logs
+    let gateLogs = await Gatelog.findAll({
+      where,
+      include: [
+        { model: Person, as: 'person' },
+        { model: Vehicle, as: 'vehicle', attributes: ['id', 'numberPlate'] },
+      ],
+      order: [['timestamp', 'ASC']],
+    });
+
+    if (!gateLogs.length) {
+      return res.status(404).json({ message: 'No active records found' });
+    }
+
+    // Apply timeGap filter if provided
+    if (timeGap) {
+      const hoursGap = parseInt(timeGap, 10);
+      gateLogs = gateLogs.filter((log, index, arr) => {
+        if (index === 0) return true;
+        const prev = arr[index - 1];
+        const diffHours =
+          (new Date(log.timestamp) - new Date(prev.timestamp)) / 36e5;
+        return diffHours >= hoursGap;
+      });
+    }
+
+    // Build person-wise in/out map
+    const reportMap = {};
+    gateLogs.forEach((log) => {
+      const pid = log.personId;
+      if (!reportMap[pid]) {
+        reportMap[pid] = {
+          person: log.person ? log.person.name : '-',
+          vehicle: log.vehicle ? log.vehicle.numberPlate : '-',
+          inTime: null,
+          outTime: null,
+        };
+      }
+
+      // First "in" and last "out"
+      if (log.type === 'in' && !reportMap[pid].inTime) {
+        reportMap[pid].inTime = log.timestamp;
+      }
+      if (log.type === 'out') {
+        reportMap[pid].outTime = log.timestamp;
+      }
+    });
+
+    const reportData = Object.values(reportMap);
+
+    // Pagination
+    const pageNum = parseInt(page, 10);
+    const pageSize = parseInt(limit, 10);
+    const total = reportData.length;
+    const paginatedData = reportData.slice(
+      (pageNum - 1) * pageSize,
+      pageNum * pageSize
+    );
+
+    if (format === 'json') {
+      return res.json({
+        success: true,
+        total,
+        page: pageNum,
+        pageSize,
+        totalPages: Math.ceil(total / pageSize),
+        report: paginatedData,
+      });
+    }
+
+    // Generate PDF
+    const doc = new PDFDocument({ margin: 20 });
+    const dateStr = new Date().toLocaleDateString();
+    res.header('Content-Type', 'application/pdf');
+    res.setHeader(
+      'Content-Disposition',
+      `attachment; filename="person-in-out-report-${dateStr}.pdf"`
+    );
+    doc.pipe(res);
+
+    doc
+      .fontSize(18)
+      .text(`Person In/Out Report - ${dateStr}`, { align: 'center' })
+      .moveDown();
+
+    // Table headers
+    doc.fontSize(12).text('Person', 50, 100);
+    doc.text('Vehicle', 200, 100);
+    doc.text('In Time', 300, 100);
+    doc.text('Out Time', 450, 100);
+    doc.moveTo(50, 120).lineTo(550, 120).stroke();
+
+    let y = 140;
+    const itemSpacing = 20;
+    paginatedData.forEach((item) => {
+      doc.text(item.person, 50, y);
+      doc.text(item.vehicle || '-', 200, y);
+      doc.text(
+        item.inTime ? new Date(item.inTime).toLocaleString() : '-',
+        300,
+        y
+      );
+      doc.text(
+        item.outTime ? new Date(item.outTime).toLocaleString() : '-',
+        450,
+        y
+      );
+      y += itemSpacing;
+    });
+
+    doc.end();
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: 'Server error', error });
+  }
+};
+module.exports = {
+  recordGateAction,
+  getTodayActivity,
+  getAllActivities,
+  generateActiveReport,
+  generateInOutReport,
+};

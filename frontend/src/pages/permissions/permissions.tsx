@@ -1,6 +1,7 @@
 import AssignRolePermissionsForm from '@/components/forms/assign-role-permissions-form';
 import AssignUserPermissionsForm from '@/components/forms/assign-user-permissions-form';
-import PermissionAddForm from '@/components/forms/permission-add-form';
+import PermissionForm from '@/components/forms/permission-form';
+import Loader from '@/components/loader';
 import PermissionTable from '@/components/tables/permission-table';
 import { Button } from '@/components/ui/button';
 import {
@@ -10,11 +11,17 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
+import type { PermissionPayload } from '@/index';
 import { usePermissionStore } from '@/stores/permissionStore';
 import { useEffect } from 'react';
 
 const Permissions = () => {
-  const { getAllPermissions, permissions } = usePermissionStore();
+  const { getAllPermissions, permissions, isLoading, createPermission } =
+    usePermissionStore();
+
+  const handleAdd = async (values: PermissionPayload) => {
+    await createPermission(values);
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -25,6 +32,7 @@ const Permissions = () => {
 
   return (
     <>
+      {isLoading && <Loader />}
       <div className='flex items-center justify-between mb-6'>
         <div>
           <h1 className='text-2xl font-semibold'>Permissions</h1>
@@ -42,7 +50,7 @@ const Permissions = () => {
               <DialogHeader>
                 <DialogTitle>Add Permissions</DialogTitle>
               </DialogHeader>
-              <PermissionAddForm />
+              <PermissionForm handleSubmit={handleAdd} />
             </DialogContent>
           </Dialog>
 

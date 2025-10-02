@@ -75,19 +75,15 @@ const data = {
       items: [
         {
           title: 'Active Time Report',
-          url: '#',
+          url: '/active-time-report',
         },
         {
           title: 'Time In/Out Report',
-          url: '#',
-        },
-        {
-          title: 'Break Logs Report',
-          url: '#',
+          url: '/time-in-out-report',
         },
         {
           title: 'Appoinment Report',
-          url: '#',
+          url: '/appointment-log-report',
         },
       ],
     },

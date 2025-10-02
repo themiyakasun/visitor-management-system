@@ -26,6 +26,7 @@ export const useVehicleStore = create<VehicleStore>((set, get) => ({
           limit: response.data.pageSize,
           totalPages: response.data.totalPages,
         },
+        isLoading: false,
       });
       return response;
     } catch (error) {
@@ -57,6 +58,26 @@ export const useVehicleStore = create<VehicleStore>((set, get) => ({
 
     try {
       const response = await vehicleServices.deleteVehicle(id);
+      set({ isLoading: false });
+      get().getAllVehicles({ page: 1, limit: 10, search: '' });
+      toast.success(response.data.message);
+      return response;
+    } catch (error) {
+      set({ isLoading: false });
+      const message = handleApiError(error);
+      toast.error(message);
+      throw new Error(message);
+    }
+  },
+  updateVehicle: async ({
+    id,
+    payload,
+  }: {
+    id: string;
+    payload: VehiclePayload;
+  }) => {
+    try {
+      const response = await vehicleServices.updateVehicle({ id, payload });
       set({ isLoading: false });
       get().getAllVehicles({ page: 1, limit: 10, search: '' });
       toast.success(response.data.message);

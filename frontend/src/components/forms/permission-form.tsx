@@ -14,21 +14,26 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { permissionSchema } from '@/lib/validationts';
 import type z from 'zod';
 import { Button } from '../ui/button';
-import { usePermissionStore } from '@/stores/permissionStore';
+import type { PermissionPayload } from '@/index';
 
-const PermissionAddForm = () => {
-  const { createPermission } = usePermissionStore();
-
-  const form = useForm({
+const PermissionForm = ({
+  handleSubmit,
+  initialData,
+}: {
+  handleSubmit: (values: PermissionPayload & { id?: number }) => void;
+  initialData?: PermissionPayload | null;
+}) => {
+  const form = useForm<z.infer<typeof permissionSchema>>({
     resolver: zodResolver(permissionSchema),
-    defaultValues: {
+    defaultValues: initialData || {
       resource: '',
       action: '',
     },
   });
 
   const onSubmit = async (values: z.infer<typeof permissionSchema>) => {
-    await createPermission(values);
+    const payload = { ...values, id: initialData?.id };
+    await handleSubmit(payload);
   };
 
   return (
@@ -77,7 +82,7 @@ const PermissionAddForm = () => {
 
                 <div className='flex flex-col gap-3'>
                   <Button type='submit' className='w-full'>
-                    Create Permission
+                    {initialData ? 'Update Permission' : 'Create Permission'}
                   </Button>
                 </div>
               </div>
@@ -89,4 +94,4 @@ const PermissionAddForm = () => {
   );
 };
 
-export default PermissionAddForm;
+export default PermissionForm;

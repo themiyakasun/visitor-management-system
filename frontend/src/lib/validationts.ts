@@ -106,3 +106,13 @@ export const appointmentSchema = z.object({
   visitorId: z.string().optional(),
   employeeId: z.string().optional(),
 });
+
+export const gateActionSchema = z.object({
+  personId: z.string().min(1, 'Person is required'),
+  vehicleId: z.string().optional(),
+  gateId: z.string().min(1, 'Gate is required'),
+  action: z.enum(['in', 'out', 'breakExit', 'breakReentry'], {
+    message: 'Action is required',
+  }),
+  breakType: z.string().optional(),
+});

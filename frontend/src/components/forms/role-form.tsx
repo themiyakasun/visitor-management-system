@@ -15,17 +15,25 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { roleSchema } from '@/lib/validationts';
 import type z from 'zod';
+import type { RolePayload } from '@/index';
 
-const RoleAddForm = ({ handleSubmit }: { handleSubmit: any }) => {
+const RoleForm = ({
+  handleSubmit,
+  initialData,
+}: {
+  handleSubmit: (values: RolePayload & { id?: string }) => void;
+  initialData?: RolePayload | null;
+}) => {
   const form = useForm({
     resolver: zodResolver(roleSchema),
-    defaultValues: {
+    defaultValues: initialData || {
       name: '',
     },
   });
 
   const onSubmit = async (values: z.infer<typeof roleSchema>) => {
-    await handleSubmit(values);
+    const payload = { ...values, id: initialData?.id };
+    await handleSubmit(payload);
   };
   return (
     <div className={cn('flex flex-col gap-6')}>
@@ -55,7 +63,7 @@ const RoleAddForm = ({ handleSubmit }: { handleSubmit: any }) => {
 
                 <div className='flex flex-col gap-3'>
                   <Button type='submit' className='w-full'>
-                    Create Role
+                    {initialData ? 'Update Role' : 'Create Role'}
                   </Button>
                 </div>
               </div>
@@ -67,4 +75,4 @@ const RoleAddForm = ({ handleSubmit }: { handleSubmit: any }) => {
   );
 };
 
-export default RoleAddForm;
+export default RoleForm;

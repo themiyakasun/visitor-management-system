@@ -1,4 +1,4 @@
-import type { User } from '@/index';
+import type { User, UserPayload } from '@/index';
 import { Button } from '../ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import {
@@ -20,6 +20,14 @@ import {
 import { useUserStore } from '@/stores/userStore';
 import { Badge } from '../ui/badge';
 import { usePermissionStore } from '@/stores/permissionStore';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '../ui/dialog';
+import UserForm from '../forms/user-form';
 
 const UserTable = ({
   total,
@@ -35,11 +43,15 @@ const UserTable = ({
   data: User[];
 }) => {
   const totalPages = Math.ceil(total / pageSize);
-  const { deleteUser } = useUserStore();
+  const { deleteUser, updateUser } = useUserStore();
   const { removeUserPermissions } = usePermissionStore();
 
   const handleDelete = async (id: string) => {
     await deleteUser(id);
+  };
+
+  const handleUpdate = async (values: UserPayload) => {
+    await updateUser({ id: values.id!, payload: values });
   };
 
   const removePermission = async ({
@@ -116,7 +128,20 @@ const UserTable = ({
                 </TableCell>
                 <TableCell>
                   <div className='flex gap-2 items-center'>
-                    <Button size='sm'>Edit</Button>
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <Button size='sm'>Edit</Button>
+                      </DialogTrigger>
+                      <DialogContent className='sm:max-w-[700px] max-h-[800px] overflow-scroll'>
+                        <DialogHeader>
+                          <DialogTitle>Edit Department</DialogTitle>
+                        </DialogHeader>
+                        <UserForm
+                          handleSubmit={handleUpdate}
+                          initialData={user}
+                        />
+                      </DialogContent>
+                    </Dialog>
                     <Button
                       variant='destructive'
                       size='sm'

@@ -1,4 +1,5 @@
 import AppointmentForm from '@/components/forms/appointment-form';
+import Loader from '@/components/loader';
 import AppointmentTable from '@/components/tables/appointment-table';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -10,15 +11,25 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
+import type { AppointmentPayload } from '@/index';
 import { useAppointmentStore } from '@/stores/appointmentStore';
 import { useEffect, useState } from 'react';
 
 const Appointments = () => {
-  const { appointments, getAllAppointments, pagination } =
-    useAppointmentStore();
+  const {
+    appointments,
+    getAllAppointments,
+    pagination,
+    isLoading,
+    createAppointment,
+  } = useAppointmentStore();
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
   const [searchQuery, setSearchQuery] = useState('');
+
+  const handleAdd = async (values: AppointmentPayload) => {
+    await createAppointment(values);
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -32,6 +43,7 @@ const Appointments = () => {
   }, [currentPage, itemsPerPage, searchQuery, getAllAppointments]);
   return (
     <>
+      {isLoading && <Loader />}
       <div className='flex items-center justify-between mb-6'>
         <div>
           <h1 className='text-2xl font-semibold'>Appointments</h1>
@@ -49,7 +61,7 @@ const Appointments = () => {
               <DialogHeader>
                 <DialogTitle>Create Appointment</DialogTitle>
               </DialogHeader>
-              <AppointmentForm />
+              <AppointmentForm handleSubmit={handleAdd} />
             </DialogContent>
           </Dialog>
         </div>

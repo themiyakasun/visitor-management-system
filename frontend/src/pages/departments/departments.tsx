@@ -8,7 +8,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import DepartmentAddForm from '@/components/forms/department-add-form';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import DepartmentTable from '@/components/tables/department-table';
@@ -16,6 +15,8 @@ import { useDepartmentStore } from '@/stores/departmentStore';
 import { useEffect, useState } from 'react';
 import type { DepartmentPayload } from '@/index';
 import { useNavigate } from 'react-router';
+import Loader from '@/components/loader';
+import DepartmentForm from '@/components/forms/department-form';
 
 const Departments = () => {
   const {
@@ -24,6 +25,7 @@ const Departments = () => {
     departments,
     createDepartment,
     getAllDepartmentsReport,
+    isLoading,
   } = useDepartmentStore();
   const navigate = useNavigate();
   const [currentPage, setCurrentPage] = useState(1);
@@ -55,6 +57,7 @@ const Departments = () => {
   };
   return (
     <>
+      {isLoading && <Loader />}
       <div className='flex items-center justify-between mb-6'>
         <div>
           <h1 className='text-2xl font-semibold'>Departments</h1>
@@ -72,7 +75,7 @@ const Departments = () => {
               <DialogHeader>
                 <DialogTitle>Add Department</DialogTitle>
               </DialogHeader>
-              <DepartmentAddForm handleSubmit={handleAdd} />
+              <DepartmentForm handleSubmit={handleAdd} />
             </DialogContent>
           </Dialog>
 
@@ -82,7 +85,6 @@ const Departments = () => {
           </Button>
         </div>
       </div>
-
       <div className='mb-4'>
         <Card>
           <CardContent>
@@ -96,7 +98,6 @@ const Departments = () => {
           </CardContent>
         </Card>
       </div>
-
       <DepartmentTable
         data={departments}
         total={pagination.total}

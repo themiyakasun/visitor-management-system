@@ -26,7 +26,7 @@ import { usePersonStore } from '@/stores/personStore';
 
 const PersonAddForm = () => {
   const { createPerson } = usePersonStore();
-  const form = useForm<z.infer<typeof personSchema>>({
+  const form = useForm({
     resolver: zodResolver(personSchema),
     defaultValues: {
       name: '',
@@ -53,7 +53,7 @@ const PersonAddForm = () => {
       payload.passType = undefined;
     }
 
-    await createPerson(payload);
+    await createPerson(values);
   };
 
   return (
@@ -194,7 +194,6 @@ const PersonAddForm = () => {
                   />
                 )}
 
-                {/* Purpose (visitor only) */}
                 {selectedType === 'visitor' && (
                   <FormField
                     control={form.control}

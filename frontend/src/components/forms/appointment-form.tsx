@@ -23,14 +23,20 @@ import {
   SelectTrigger,
   SelectValue,
 } from '../ui/select';
-import { useAppointmentStore } from '@/stores/appointmentStore';
+import type { AppointmentPayload } from '@/index';
 
-const AppointmentForm = () => {
+const AppointmentForm = ({
+  handleSubmit,
+  initialData,
+}: {
+  handleSubmit: (values: AppointmentPayload & { id?: string }) => void;
+  initialData?: AppointmentPayload | null;
+}) => {
   const { persons, getAllPersons } = usePersonStore();
-  const { createAppointment } = useAppointmentStore();
+
   const form = useForm<z.infer<typeof appointmentSchema>>({
     resolver: zodResolver(appointmentSchema),
-    defaultValues: {
+    defaultValues: initialData || {
       datetime: '',
       purpose: '',
       expectedDuration: 30,
@@ -47,7 +53,8 @@ const AppointmentForm = () => {
   }, [getAllPersons]);
 
   const onSubmit = async (values: z.infer<typeof appointmentSchema>) => {
-    await createAppointment(values);
+    const payload = { ...values, id: initialData?.id };
+    await handleSubmit(payload);
   };
 
   return (

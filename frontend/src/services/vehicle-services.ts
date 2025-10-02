@@ -23,4 +23,14 @@ export const vehicleServices = {
     const response = await api.delete(`/vehicles/${id}`);
     return response;
   },
+  updateVehicle: async ({
+    id,
+    payload,
+  }: {
+    id: string;
+    payload: VehiclePayload;
+  }) => {
+    const response = await api.put(`/vehicles/${id}`, payload);
+    return response;
+  },
 };

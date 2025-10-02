@@ -1,4 +1,5 @@
-import RoleAddForm from '@/components/forms/role-add-form';
+import RoleForm from '@/components/forms/role-form';
+import Loader from '@/components/loader';
 import RoleTable from '@/components/tables/role-table';
 import { Button } from '@/components/ui/button';
 import {
@@ -8,12 +9,12 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import type { Role } from '@/index';
+import type { RolePayload } from '@/index';
 import { useRoleStore } from '@/stores/roleStore';
 import { useEffect } from 'react';
 
 const Roles = () => {
-  const { roles, getAllRoles, createRole } = useRoleStore();
+  const { roles, getAllRoles, createRole, isLoading } = useRoleStore();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -22,12 +23,13 @@ const Roles = () => {
     fetchData();
   }, [getAllRoles]);
 
-  const handleAdd = async (values: Role) => {
+  const handleAdd = async (values: RolePayload) => {
     await createRole(values);
   };
 
   return (
     <>
+      {isLoading && <Loader />}
       <div className='flex items-center justify-between mb-6'>
         <div>
           <h1 className='text-2xl font-semibold'>Roles</h1>
@@ -45,7 +47,7 @@ const Roles = () => {
               <DialogHeader>
                 <DialogTitle>Add Roles</DialogTitle>
               </DialogHeader>
-              <RoleAddForm handleSubmit={handleAdd} />
+              <RoleForm handleSubmit={handleAdd} />
             </DialogContent>
           </Dialog>
         </div>

@@ -35,4 +35,18 @@ export const departmentSerives = {
     const response = await api.delete(`/departments/${id}`);
     return response;
   },
+
+  updateDepartment: async ({
+    id,
+    payload,
+  }: {
+    id: string;
+    payload: DepartmentPayload;
+  }) => {
+    const response = await api.put(`/departments/update/${id}`, {
+      name: payload.name,
+      description: payload.description,
+    });
+    return response;
+  },
 };

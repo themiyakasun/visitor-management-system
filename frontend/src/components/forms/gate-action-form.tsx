@@ -18,29 +18,25 @@ import {
 } from '../ui/select';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import type z from 'zod';
+import z from 'zod';
 import { cn } from '@/lib/utils';
-import { vehicleSchema } from '@/lib/validationts';
-import { useVehicleStore } from '@/stores/vehicleStore';
+import { gateActionSchema } from '@/lib/validationts';
+import { useGateStore } from '@/stores/gateStore';
 import { usePersonStore } from '@/stores/personStore';
 import { useEffect } from 'react';
 
-const vehicleTypes = ['Car', 'Van', 'Lorry', 'Bike', 'Bus', 'Other'];
-
-const VehicleCreateForm = () => {
-  const { createVehicle } = useVehicleStore();
+const GateActionForm = () => {
+  const { recordGateAction } = useGateStore();
   const { persons, getAllPersons } = usePersonStore();
 
-  const form = useForm<z.infer<typeof vehicleSchema>>({
-    resolver: zodResolver(vehicleSchema),
+  const form = useForm({
+    resolver: zodResolver(gateActionSchema),
     defaultValues: {
-      numberPlate: '',
-      type: '',
-      make: '',
-      model: '',
-      color: '',
-      passExpiryDate: '',
-      driverId: '',
+      personId: '',
+      vehicleId: '',
+      gateId: '',
+      action: 'in',
+      breakType: '',
     },
   });
 
@@ -51,8 +47,18 @@ const VehicleCreateForm = () => {
     fetchData();
   }, [getAllPersons]);
 
-  const onSubmit = async (values: z.infer<typeof vehicleSchema>) => {
-    await createVehicle(values);
+  const selectedAction = form.watch('action');
+
+  const onSubmit = async (values: z.infer<typeof gateActionSchema>) => {
+    const payload = { ...values };
+
+    if (payload.action !== 'breakExit') {
+      delete payload.breakType;
+    }
+
+    console.log(values);
+
+    await recordGateAction(payload);
   };
 
   return (
@@ -62,42 +68,26 @@ const VehicleCreateForm = () => {
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)}>
               <div className='flex flex-col gap-6'>
+                {/* Person */}
                 <FormField
                   control={form.control}
-                  name='numberPlate'
+                  name='personId'
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Number Plate</FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder='Enter vehicle number plate'
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name='type'
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Vehicle Type</FormLabel>
+                      <FormLabel>Person ID</FormLabel>
                       <Select
                         onValueChange={field.onChange}
                         defaultValue={field.value}
                       >
                         <FormControl className='w-full'>
                           <SelectTrigger>
-                            <SelectValue placeholder='Select vehicle type' />
+                            <SelectValue placeholder='Select Person' />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {vehicleTypes.map((v) => (
-                            <SelectItem value={v} key={v}>
-                              {v}
+                          {persons.map((person) => (
+                            <SelectItem value={person.id} key={person.id}>
+                              {person.name}
                             </SelectItem>
                           ))}
                         </SelectContent>
@@ -107,93 +97,97 @@ const VehicleCreateForm = () => {
                   )}
                 />
 
+                {/* Vehicle */}
                 <FormField
                   control={form.control}
-                  name='make'
+                  name='vehicleId'
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Make</FormLabel>
+                      <FormLabel>Vehicle ID (optional)</FormLabel>
                       <FormControl>
-                        <Input placeholder='Enter vehicle make' {...field} />
+                        <Input placeholder='Enter vehicle ID' {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
 
+                {/* Gate */}
                 <FormField
                   control={form.control}
-                  name='model'
+                  name='gateId'
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Model</FormLabel>
+                      <FormLabel>Gate ID</FormLabel>
                       <FormControl>
-                        <Input placeholder='Enter vehicle model' {...field} />
+                        <Input placeholder='Enter gate ID' {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
 
+                {/* Action */}
                 <FormField
                   control={form.control}
-                  name='color'
+                  name='action'
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Color</FormLabel>
-                      <FormControl>
-                        <Input placeholder='Enter vehicle color' {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name='passExpiryDate'
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Pass Expiry Date</FormLabel>
-                      <FormControl>
-                        <Input type='date' {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name='driverId'
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Assign Driver</FormLabel>
+                      <FormLabel>Action</FormLabel>
                       <Select
                         onValueChange={field.onChange}
                         defaultValue={field.value}
                       >
                         <FormControl className='w-full'>
                           <SelectTrigger>
-                            <SelectValue placeholder='Select driver' />
+                            <SelectValue placeholder='Select action' />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {persons.map((driver) => (
-                            <SelectItem value={driver.id} key={driver.id}>
-                              {driver.name}
-                            </SelectItem>
-                          ))}
+                          <SelectItem value='in'>Entry</SelectItem>
+                          <SelectItem value='out'>Exit</SelectItem>
+                          <SelectItem value='breakExit'>Break Exit</SelectItem>
+                          <SelectItem value='breakReentry'>
+                            Break Reentry
+                          </SelectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
+
+                {/* Break Type - only if breakExit */}
+                {selectedAction === 'breakExit' && (
+                  <FormField
+                    control={form.control}
+                    name='breakType'
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Break Type</FormLabel>
+                        <Select
+                          onValueChange={field.onChange}
+                          defaultValue={field.value}
+                        >
+                          <FormControl className='w-full'>
+                            <SelectTrigger>
+                              <SelectValue placeholder='Select break type' />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value='tea'>Tea Break</SelectItem>
+                            <SelectItem value='lunch'>Lunch Break</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                )}
 
                 <div className='flex flex-col gap-3'>
                   <Button type='submit' className='w-full'>
-                    Create Vehicle
+                    Record Gate Action
                   </Button>
                 </div>
               </div>
@@ -205,4 +199,4 @@ const VehicleCreateForm = () => {
   );
 };
 
-export default VehicleCreateForm;
+export default GateActionForm;

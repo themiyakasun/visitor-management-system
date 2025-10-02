@@ -25,12 +25,14 @@ const AppointmentTable = ({
   pageSize,
   onPageChange,
   data,
+  showActions = true,
 }: {
   total: number;
   page: number;
   pageSize: number;
   onPageChange: (page: number) => void;
   data: Appointment[];
+  showActions?: boolean;
 }) => {
   const { updateAppointment } = useAppointmentStore();
   const totalPages = Math.ceil(total / pageSize);
@@ -67,7 +69,7 @@ const AppointmentTable = ({
               <TableHead>Arrival Time</TableHead>
               <TableHead>Departure Time</TableHead>
               <TableHead>Status</TableHead>
-              <TableHead>Actions</TableHead>
+              {showActions && <TableHead>Actions</TableHead>}
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -94,18 +96,20 @@ const AppointmentTable = ({
                   )}
                 </TableCell>
                 <TableCell>{appointment.status}</TableCell>
-                <TableCell>
-                  <div className='flex gap-2 items-center'>
-                    <Button size='sm'>Edit</Button>
-                    <Button
-                      variant='destructive'
-                      size='sm'
-                      onClick={() => handleCancel(appointment.id)}
-                    >
-                      Cancel Appointment
-                    </Button>
-                  </div>
-                </TableCell>
+                {showActions && (
+                  <TableCell>
+                    <div className='flex gap-2 items-center'>
+                      <Button size='sm'>Edit</Button>
+                      <Button
+                        variant='destructive'
+                        size='sm'
+                        onClick={() => handleCancel(appointment.id)}
+                      >
+                        Cancel Appointment
+                      </Button>
+                    </div>
+                  </TableCell>
+                )}
               </TableRow>
             ))}
           </TableBody>

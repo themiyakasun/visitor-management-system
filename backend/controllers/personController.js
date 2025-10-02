@@ -67,7 +67,7 @@ const createPerson = async (req, res) => {
       passExpiryDate,
     });
 
-    if (type === 'driver' && vehicleData.length > 0) {
+    if (type === 'driver' && vehicleData?.length > 0) {
       const vehiclesToCreate = vehicleData.map((v) => ({
         ...v,
         driverId: person.id,
@@ -321,6 +321,7 @@ const updatePerson = async (req, res) => {
       .status(201)
       .json({ message: 'Person updated successfully', person });
   } catch (error) {
+    console.log(error);
     return res.status(500).json({ message: 'Server error', error });
   }
 };

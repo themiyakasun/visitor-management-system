@@ -26,6 +26,7 @@ export const useUserStore = create<UserStore>((set, get) => ({
           limit: response.data.pageSize,
           totalPages: response.data.totalPages,
         },
+        isLoading: false,
       });
 
       return response;

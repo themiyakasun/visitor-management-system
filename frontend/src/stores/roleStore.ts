@@ -73,6 +73,7 @@ export const useRoleStore = create<RoleStore>((set, get) => ({
       set({
         isLoading: false,
       });
+      toast.success(response.data.message);
       get().getAllRoles();
       return response;
     } catch (error) {

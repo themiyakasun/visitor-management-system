@@ -10,15 +10,27 @@ import {
   TableHeader,
   TableRow,
 } from '../ui/table';
-import type { Role } from '@/index';
+import type { Role, RolePayload } from '@/index';
 import { useRoleStore } from '@/stores/roleStore';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '../ui/dialog';
+import RoleForm from '../forms/role-form';
 
 const RoleTable = ({ data }: { data: Role[] }) => {
-  const { deleteRole } = useRoleStore();
+  const { deleteRole, updateRole } = useRoleStore();
   const { removeRolePermissions } = usePermissionStore();
 
   const handleDelete = async (id: string) => {
     await deleteRole(id);
+  };
+
+  const handleUpdate = async (values: RolePayload) => {
+    await updateRole({ id: values.id!, values });
   };
 
   const removePermission = async ({
@@ -82,7 +94,20 @@ const RoleTable = ({ data }: { data: Role[] }) => {
                 </TableCell>
                 <TableCell>
                   <div className='flex gap-2 items-center'>
-                    <Button size='sm'>Edit</Button>
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <Button size='sm'>Edit</Button>
+                      </DialogTrigger>
+                      <DialogContent className='sm:max-w-[700px] max-h-[800px] overflow-scroll'>
+                        <DialogHeader>
+                          <DialogTitle>Edit Role</DialogTitle>
+                        </DialogHeader>
+                        <RoleForm
+                          handleSubmit={handleUpdate}
+                          initialData={role}
+                        />
+                      </DialogContent>
+                    </Dialog>
                     <Button
                       variant='destructive'
                       size='sm'

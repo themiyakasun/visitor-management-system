@@ -26,6 +26,7 @@ export const usePersonStore = create<PersonStore>((set, get) => ({
           limit: response.data.pageSize,
           totalPages: response.data.totalPages,
         },
+        isLoading: false,
       });
 
       return response;
@@ -57,6 +58,29 @@ export const usePersonStore = create<PersonStore>((set, get) => ({
     set({ isLoading: true });
     try {
       const response = await personServices.deletePerson(id);
+      set({
+        isLoading: false,
+      });
+      toast.success(response.data.message);
+      get().getAllPersons({ page: 1, limit: 10, search: '' });
+      return response;
+    } catch (error) {
+      set({ isLoading: false });
+      const message = handleApiError(error);
+      toast.error(message);
+      throw new Error(message);
+    }
+  },
+  updatePerson: async ({
+    id,
+    payload,
+  }: {
+    id: string;
+    payload: PersonPayload;
+  }) => {
+    set({ isLoading: true });
+    try {
+      const response = await personServices.updatePerson({ id, payload });
       set({
         isLoading: false,
       });

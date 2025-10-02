@@ -18,6 +18,13 @@ import {
 } from '../ui/pagination';
 import type { Person } from '@/index';
 import { usePersonStore } from '@/stores/personStore';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '../ui/dialog';
 
 const PersonTable = ({
   total,
@@ -39,6 +46,10 @@ const PersonTable = ({
     const isConfirmed = confirm('Sure want to delete this visitor');
     if (isConfirmed) deletePerson(id);
   };
+
+  // const handleUpdate = async (values: PersonPayload) => {
+  //   await updatePerson({id: values.id!, payload: values})
+  // };
 
   if (!data || data.length === 0) {
     return (
@@ -74,7 +85,33 @@ const PersonTable = ({
                 <TableCell>{person.type}</TableCell>
                 <TableCell>
                   <div className='flex gap-2 items-center'>
-                    <Button size='sm'>Edit</Button>
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <Button size='sm'>Edit</Button>
+                      </DialogTrigger>
+                      <DialogContent className='sm:max-w-[700px] max-h-[800px] overflow-scroll'>
+                        <DialogHeader>
+                          <DialogTitle>Edit Department</DialogTitle>
+                        </DialogHeader>
+                        {/* <PersonForm
+                          handleSubmit={handleUpdate}
+                          initialData={{
+                            ...person,
+                            email: person.email ?? undefined,
+                            type: person.type ?? 'employee',
+                            phone: person.phone ?? undefined,
+                            address: person.address ?? undefined,
+                            nic: person.nic ?? '',
+                            companyName: person.companyName ?? undefined,
+                            purpose: person.purpose ?? undefined,
+                            passExpiryDate: person.passExpiryDate
+                              ? person.passExpiryDate.toISOString()
+                              : undefined,
+                            passType: person.passType ?? undefined,
+                          }}
+                        /> */}
+                      </DialogContent>
+                    </Dialog>
                     <Button
                       variant='destructive'
                       size='sm'

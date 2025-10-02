@@ -21,9 +21,7 @@ export const permissionService = {
     id: number;
     payload: PermissionPayload;
   }) => {
-    const response = await api.put(`/permissions/${id}`, {
-      payload,
-    });
+    const response = await api.put(`/permissions/${id}`, payload);
     return response;
   },
   deletePermission: async (id: number) => {

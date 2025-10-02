@@ -56,6 +56,13 @@ interface DepartmentStore {
   createDepartment: (values: DepartmentPayload) => Promise<any>;
   getAllDepartmentsReport: () => Promise<any>;
   deleteDepartment: (id: string) => Promise<any>;
+  updateDepartment: ({
+    id,
+    payload,
+  }: {
+    id: string;
+    payload: DepartmentPayload;
+  }) => Promise<any>;
 }
 
 interface RoleStore {
@@ -141,6 +148,13 @@ interface VehicleStore {
   getAllVehicles: (params: ParamsPayload) => Promise<any>;
   createVehicle: (payload: VehiclePayload) => Promise<any>;
   deleteVehicle: (id: string) => Promise<any>;
+  updateVehicle: ({
+    id,
+    payload,
+  }: {
+    id: string;
+    payload: VehiclePayload;
+  }) => Promise<any>;
 }
 
 interface AppointmentStore {
@@ -161,6 +175,24 @@ interface AppointmentStore {
     payload: AppointmentUpdatePayload;
     id: string;
   }) => Promise<any>;
+  generateAppointmentsReport: (params: ActiveTimeParamsPayload) => Promise<any>;
+}
+
+interface GatelogStore {
+  gatelogs: GateLog[];
+  inOutReport: InOutGate[];
+  isLoading: boolean;
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
+  recordGateAction: (payload: GateActionPayload) => Promise<any>;
+  getTodayActivity: (params: ParamsPayload) => Promise<any>;
+  getAllActivity: (params: ParamsPayload) => Promise<any>;
+  generateActiveReport: (params: ActiveTimeParamsPayload) => Promise<any>;
+  generateInOutReport: (params: ActiveTimeParamsPayload) => Promise<any>;
 }
 
 type ParamsPayload = {
@@ -173,6 +205,18 @@ type ParamsPayload = {
   type?: string;
 };
 
+type ActiveTimeParamsPayload = {
+  fromDate?: string;
+  toDate?: string;
+  type?: string;
+  personId?: string;
+  vehicleId?: string;
+  timeGap?: string;
+  format?: string;
+  page?: number;
+  limit?: number;
+};
+
 type Department = {
   id: string;
   name: string;
@@ -180,11 +224,13 @@ type Department = {
 };
 
 type DepartmentPayload = {
+  id?: string;
   name: string;
   description?: string;
 };
 
 type RolePayload = {
+  id?: string;
   name: string;
 };
 
@@ -195,6 +241,7 @@ type Role = {
 };
 
 type UserPayload = {
+  id?: string;
   name: string;
   email: string;
   password: string;
@@ -210,6 +257,7 @@ type User = {
 };
 
 type PermissionPayload = {
+  id?: number;
   resource: string;
   action: string;
 };
@@ -271,13 +319,14 @@ export type Vehicle = {
 };
 
 export type VehiclePayload = {
+  id?: string;
   numberPlate: string;
   type?: string;
   make?: string;
   model?: string;
   color?: string;
   passExpiryDate?: string;
-  driverId: string;
+  driverId?: string;
 };
 
 export type Appointment = {
@@ -295,6 +344,7 @@ export type Appointment = {
 };
 
 export type AppointmentPayload = {
+  id?: string;
   datetime: string;
   purpose: string;
   expectedDuration: number;
@@ -308,4 +358,29 @@ export type AppointmentUpdatePayload = {
   status?: string;
   purpose?: string;
   expectedDuration?: string;
+};
+
+export type GateLog = {
+  id: string;
+  personId: string;
+  vehicleId?: string;
+  type: string;
+  timestamp: string;
+  vehicle: Vehicle;
+  person: Person;
+};
+
+export type InOutGate = {
+  person: string;
+  inTime: string;
+  outTime?: string;
+  vehicle?: string;
+};
+
+export type GateActionPayload = {
+  personId: string;
+  vehicleId?: string;
+  gateId: string;
+  action: string;
+  breakType?: string;
 };

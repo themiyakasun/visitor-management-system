@@ -17,21 +17,24 @@ import type z from 'zod';
 import { Textarea } from '../ui/textarea';
 import type { DepartmentPayload } from '@/index';
 
-const DepartmentAddForm = ({
+const DepartmentForm = ({
   handleSubmit,
+  initialData,
 }: {
-  handleSubmit: (values: DepartmentPayload) => void;
+  handleSubmit: (values: DepartmentPayload & { id?: string }) => void;
+  initialData?: DepartmentPayload | null;
 }) => {
-  const form = useForm({
+  const form = useForm<z.infer<typeof departmentSchema>>({
     resolver: zodResolver(departmentSchema),
-    defaultValues: {
+    defaultValues: initialData || {
       name: '',
       description: '',
     },
   });
 
   const onSubmit = async (values: z.infer<typeof departmentSchema>) => {
-    await handleSubmit(values);
+    const payload = { ...values, id: initialData?.id };
+    await handleSubmit(payload);
   };
   return (
     <div className={cn('flex flex-col gap-6')}>
@@ -79,7 +82,7 @@ const DepartmentAddForm = ({
 
                 <div className='flex flex-col gap-3'>
                   <Button type='submit' className='w-full'>
-                    Create Department
+                    {initialData ? 'Update Department' : 'Create Department'}
                   </Button>
                 </div>
               </div>
@@ -91,4 +94,4 @@ const DepartmentAddForm = ({
   );
 };
 
-export default DepartmentAddForm;
+export default DepartmentForm;

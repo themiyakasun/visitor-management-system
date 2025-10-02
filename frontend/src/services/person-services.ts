@@ -28,4 +28,14 @@ export const personServices = {
     const response = await api.delete(`/persons/${id}`);
     return response;
   },
+  updatePerson: async ({
+    id,
+    payload,
+  }: {
+    id: string;
+    payload: PersonPayload;
+  }) => {
+    const response = await api.put(`/persons/${id}`, payload);
+    return response;
+  },
 };

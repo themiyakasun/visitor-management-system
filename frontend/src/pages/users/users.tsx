@@ -1,4 +1,5 @@
 import UserForm from '@/components/forms/user-form';
+import Loader from '@/components/loader';
 import UserTable from '@/components/tables/user-table';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -10,11 +11,12 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
+import type { UserPayload } from '@/index';
 import { useUserStore } from '@/stores/userStore';
 import { useEffect, useState } from 'react';
 
 const Users = () => {
-  const { users, getUsers, pagination } = useUserStore();
+  const { users, getUsers, pagination, isLoading, createUser } = useUserStore();
   const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
@@ -30,8 +32,18 @@ const Users = () => {
     fetchData();
   }, [currentPage, itemsPerPage, searchQuery, getUsers]);
 
+  const handleAdd = async (values: UserPayload) => {
+    await createUser({
+      name: values.name,
+      email: values.email,
+      password: values.password,
+      roleNames: values.roleNames,
+    });
+  };
+
   return (
     <>
+      {isLoading && <Loader />}
       <div className='flex items-center justify-between mb-6'>
         <div>
           <h1 className='text-2xl font-semibold'>Users</h1>
@@ -49,7 +61,7 @@ const Users = () => {
               <DialogHeader>
                 <DialogTitle>Add User</DialogTitle>
               </DialogHeader>
-              <UserForm />
+              <UserForm handleSubmit={handleAdd} />
             </DialogContent>
           </Dialog>
         </div>

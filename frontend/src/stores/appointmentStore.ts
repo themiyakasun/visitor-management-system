@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import type {
+  ActiveTimeParamsPayload,
   AppointmentPayload,
   AppointmentStore,
   AppointmentUpdatePayload,
@@ -84,6 +85,36 @@ export const useAppointmentStore = create<AppointmentStore>((set, get) => ({
       set({ isLoading: false });
       const message = handleApiError(error);
       toast.error(message);
+      throw new Error(message);
+    }
+  },
+  generateAppointmentsReport: async (params: ActiveTimeParamsPayload) => {
+    set({ isLoading: true });
+
+    try {
+      const response = await appointmentServices.generateAppointmentsReport(
+        params
+      );
+      if (params.format === 'json') {
+        set({
+          isLoading: false,
+          appointments: response.data.appointments,
+          pagination: {
+            page: response.data.page,
+            total: response.data.total,
+            limit: response.data.pageSize,
+            totalPages: response.data.totalPages,
+          },
+        });
+      } else if (params.format === 'pdf') {
+        set({ isLoading: false });
+      }
+
+      return response;
+    } catch (error) {
+      set({ isLoading: false });
+      const message = handleApiError(error);
+      console.log(message);
       throw new Error(message);
     }
   },

@@ -1,4 +1,4 @@
-import type { Vehicle } from '@/index';
+import type { Vehicle, VehiclePayload } from '@/index';
 import { Button } from '../ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import {
@@ -18,6 +18,14 @@ import {
   PaginationPrevious,
 } from '../ui/pagination';
 import { useVehicleStore } from '@/stores/vehicleStore';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '../ui/dialog';
+import VehicleForm from '../forms/vehicle-form';
 
 const VehicleTable = ({
   total,
@@ -32,12 +40,16 @@ const VehicleTable = ({
   onPageChange: (page: number) => void;
   data: Vehicle[];
 }) => {
-  const { deleteVehicle } = useVehicleStore();
+  const { deleteVehicle, updateVehicle } = useVehicleStore();
 
   const totalPages = Math.ceil(total / pageSize);
 
   const handleDelete = async (id: string) => {
     await deleteVehicle(id);
+  };
+
+  const handleUpdate = async (values: VehiclePayload) => {
+    await updateVehicle({ id: values.id!, payload: values });
   };
 
   if (!data || data.length === 0) {
@@ -77,7 +89,20 @@ const VehicleTable = ({
                 <TableCell>{Vehicle.driver.name}</TableCell>
                 <TableCell>
                   <div className='flex gap-2 items-center'>
-                    <Button size='sm'>Edit</Button>
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <Button size='sm'>Edit</Button>
+                      </DialogTrigger>
+                      <DialogContent className='sm:max-w-[700px] max-h-[800px] overflow-scroll'>
+                        <DialogHeader>
+                          <DialogTitle>Edit Vehicle</DialogTitle>
+                        </DialogHeader>
+                        <VehicleForm
+                          handleSubmit={handleUpdate}
+                          initialData={Vehicle}
+                        />
+                      </DialogContent>
+                    </Dialog>
                     <Button
                       variant='destructive'
                       size='sm'

@@ -16,10 +16,18 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from '../ui/pagination';
-import type { Department } from '@/index';
+import type { Department, DepartmentPayload } from '@/index';
 import { ArrowDownToLine } from 'lucide-react';
 import { useDepartmentStore } from '@/stores/departmentStore';
 import { useNavigate } from 'react-router';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '../ui/dialog';
+import DepartmentForm from '../forms/department-form';
 
 const DepartmentTable = ({
   total,
@@ -35,7 +43,8 @@ const DepartmentTable = ({
   data: Department[];
 }) => {
   const totalPages = Math.ceil(total / pageSize);
-  const { getDepartmentReport, deleteDepartment } = useDepartmentStore();
+  const { getDepartmentReport, deleteDepartment, updateDepartment } =
+    useDepartmentStore();
   const navigate = useNavigate();
 
   const handleGenerateReport = async (id: string) => {
@@ -49,6 +58,10 @@ const DepartmentTable = ({
   const handleDelete = async (id: string) => {
     const isConfirmed = confirm('Sure want to delete this department');
     if (isConfirmed) await deleteDepartment(id);
+  };
+
+  const handleUpdate = async (values: DepartmentPayload) => {
+    await updateDepartment({ id: values.id!, payload: values });
   };
 
   if (!data || data.length === 0) {
@@ -83,7 +96,20 @@ const DepartmentTable = ({
                 <TableCell>{department.description}</TableCell>
                 <TableCell>
                   <div className='flex gap-2 items-center'>
-                    <Button size='sm'>Edit</Button>
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <Button size='sm'>Edit</Button>
+                      </DialogTrigger>
+                      <DialogContent className='sm:max-w-[700px] max-h-[800px] overflow-scroll'>
+                        <DialogHeader>
+                          <DialogTitle>Edit Department</DialogTitle>
+                        </DialogHeader>
+                        <DepartmentForm
+                          handleSubmit={handleUpdate}
+                          initialData={department}
+                        />
+                      </DialogContent>
+                    </Dialog>
                     <Button
                       variant='destructive'
                       size='sm'

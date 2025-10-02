@@ -1,4 +1,5 @@
-import VehicleCreateForm from '@/components/forms/create-vehicle-form';
+import VehicleForm from '@/components/forms/vehicle-form';
+import Loader from '@/components/loader';
 import VehicleTable from '@/components/tables/vehicle-table';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -10,14 +11,20 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
+import type { VehiclePayload } from '@/index';
 import { useVehicleStore } from '@/stores/vehicleStore';
 import { useEffect, useState } from 'react';
 
 const Vehicles = () => {
-  const { vehicles, getAllVehicles, pagination } = useVehicleStore();
+  const { vehicles, getAllVehicles, pagination, isLoading, createVehicle } =
+    useVehicleStore();
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
   const [searchQuery, setSearchQuery] = useState('');
+
+  const handleAdd = async (values: VehiclePayload) => {
+    await createVehicle(values);
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -31,6 +38,7 @@ const Vehicles = () => {
   }, [searchQuery, itemsPerPage, currentPage, getAllVehicles]);
   return (
     <>
+      {isLoading && <Loader />}
       <div className='flex items-center justify-between mb-6'>
         <div>
           <h1 className='text-2xl font-semibold'>Vehicles</h1>
@@ -48,7 +56,7 @@ const Vehicles = () => {
               <DialogHeader>
                 <DialogTitle>Add Vehicle</DialogTitle>
               </DialogHeader>
-              <VehicleCreateForm />
+              <VehicleForm handleSubmit={handleAdd} />
             </DialogContent>
           </Dialog>
         </div>

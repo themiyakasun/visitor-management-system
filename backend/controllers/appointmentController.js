@@ -1,3 +1,5 @@
+const { Op } = require('sequelize');
+const PDFDocument = require('pdfkit');
 const { Appointment, Person } = require('../models');
 const { parseQueryParams } = require('../utils/helpers.js');
 
@@ -183,10 +185,139 @@ const deleteAppointment = async (req, res) => {
   }
 };
 
+const generateAppointmentReport = async (req, res) => {
+  try {
+    const {
+      fromDate,
+      toDate,
+      status,
+      personId,
+      format,
+      page = 1,
+      limit = 50,
+      sortBy = 'actualArrival',
+      sortOrder = 'ASC',
+      search,
+    } = req.query;
+
+    const pageNum = parseInt(page, 10);
+    const pageSize = parseInt(limit, 10);
+    const offset = (pageNum - 1) * pageSize;
+
+    const where = {
+      tenantId: req.user.tenantId,
+    };
+
+    // Filters
+    if (fromDate && toDate) {
+      where.actualArrival = {
+        [Op.between]: [new Date(fromDate), new Date(toDate)],
+      };
+    } else if (fromDate) {
+      where.actualArrival = { [Op.gte]: new Date(fromDate) };
+    } else if (toDate) {
+      where.actualArrival = { [Op.lte]: new Date(toDate) };
+    }
+
+    if (personId) {
+      where[Op.or] = [{ visitorId: personId }, { employeeId: personId }];
+    }
+
+    if (search) {
+      where[Op.or] = [
+        { '$visitor.name$': { [Op.like]: `%${search}%` } },
+        { '$employee.name$': { [Op.like]: `%${search}%` } },
+        { status: { [Op.like]: `%${search}%` } },
+      ];
+    }
+
+    const { count, rows } = await Appointment.findAndCountAll({
+      where,
+      include: [
+        { model: Person, as: 'visitor', attributes: ['id', 'name'] },
+        { model: Person, as: 'employee', attributes: ['id', 'name'] },
+      ],
+      order: [[sortBy, sortOrder]],
+      limit: pageSize,
+      offset,
+    });
+
+    if (!rows.length) {
+      return res.json({
+        success: true,
+        total: 0,
+        page: pageNum,
+        pageSize,
+        totalPages: 0,
+        appointments: [],
+      });
+    }
+
+    // JSON Response
+    if (format === 'json') {
+      return res.json({
+        success: true,
+        total: count,
+        page: pageNum,
+        pageSize,
+        totalPages: Math.ceil(count / pageSize),
+        appointments: rows,
+      });
+    }
+
+    // PDF Response
+    const doc = new PDFDocument({ margin: 20 });
+    const dateStr = new Date().toLocaleDateString();
+    res.header('Content-Type', 'application/pdf');
+    res.setHeader(
+      'Content-Disposition',
+      `attachment; filename="appointment-report-${dateStr}.pdf"`
+    );
+    doc.pipe(res);
+
+    doc
+      .fontSize(18)
+      .text(`Appointment Report - ${dateStr}`, { align: 'center' })
+      .moveDown();
+
+    doc.fontSize(12).text('Visitor', 50, 100);
+    doc.text('Employee', 200, 100);
+    doc.text('Status', 350, 100);
+    doc.text('Arrival', 420, 100);
+    doc.text('Departure', 500, 100);
+    doc.moveTo(50, 120).lineTo(550, 120).stroke();
+
+    let y = 140;
+    const itemSpacing = 20;
+    rows.forEach((a) => {
+      doc.text(a.visitor ? a.visitor.name : '-', 50, y);
+      doc.text(a.employee ? a.employee.name : '-', 200, y);
+      doc.text(a.status, 350, y);
+      doc.text(
+        a.actualArrival ? new Date(a.actualArrival).toLocaleString() : '-',
+        420,
+        y
+      );
+      doc.text(
+        a.actualDeparture ? new Date(a.actualDeparture).toLocaleString() : '-',
+        500,
+        y
+      );
+      y += itemSpacing;
+    });
+
+    doc.end();
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: 'Server error', error });
+  }
+};
+
 module.exports = {
   createAppointment,
   getAllAppointments,
   updateAppointment,
   getAppointmentById,
   deleteAppointment,
+  generateAppointmentReport,
 };

@@ -1,14 +1,18 @@
 import ProtectedRoutes from '@/components/protected-routes/protected-routes';
+import ActiveTimeReport from '@/pages/active-time-report/active-time-report';
+import AppointmentLogReport from '@/pages/appointment-log-report/appointment-log-report';
 import Appointments from '@/pages/appointments/appointments';
 import ChangePassword from '@/pages/auth/change-password';
 import Login from '@/pages/auth/login';
 import Unauthorized from '@/pages/auth/unauthorized';
 import Dashboard from '@/pages/dashboard/dashboard';
 import Departments from '@/pages/departments/departments';
+import GateLogs from '@/pages/gate-logs/gate-logs';
 import Permissions from '@/pages/permissions/permissions';
 import Persons from '@/pages/persons/persons';
 import ReportViewer from '@/pages/reports/report-viewer';
 import Roles from '@/pages/roles/roles';
+import TimeInOut from '@/pages/time-in-out-report/time-in-out';
 import Users from '@/pages/users/users';
 import Vehicles from '@/pages/vehicles/vehicles';
 import RootLayout from '@/RootLayout';
@@ -74,6 +78,22 @@ const router = createBrowserRouter([
       {
         path: '/appointments',
         element: <Appointments />,
+      },
+      {
+        path: '/gate-logs',
+        element: <GateLogs />,
+      },
+      {
+        path: '/active-time-report',
+        element: <ActiveTimeReport />,
+      },
+      {
+        path: '/time-in-out-report',
+        element: <TimeInOut />,
+      },
+      {
+        path: '/appointment-log-report',
+        element: <AppointmentLogReport />,
       },
     ],
   },

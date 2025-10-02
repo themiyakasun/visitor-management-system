@@ -27,19 +27,26 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import type z from 'zod';
-import { useUserStore } from '@/stores/userStore';
 import { useRoleStore } from '@/stores/roleStore';
 import { useEffect, useState } from 'react';
 import { Badge } from '../ui/badge';
+import type { UserPayload } from '@/index';
 
-const UserForm = () => {
-  const { createUser } = useUserStore();
+const UserForm = ({
+  handleSubmit,
+  initialData,
+}: {
+  handleSubmit: (
+    values: UserPayload & { id?: string; roleNames: string[] }
+  ) => void;
+  initialData?: UserPayload | null;
+}) => {
   const { getAllRoles, roles } = useRoleStore();
   const [selectedRoles, setSelectedRoles] = useState<string[]>([]);
 
-  const form = useForm({
+  const form = useForm<z.infer<typeof userSchema>>({
     resolver: zodResolver(userSchema),
-    defaultValues: {
+    defaultValues: initialData || {
       name: '',
       email: '',
       password: '',
@@ -55,12 +62,12 @@ const UserForm = () => {
   }, [getAllRoles]);
 
   const onSubmit = async (values: z.infer<typeof userSchema>) => {
-    await createUser({
-      name: values.name,
-      email: values.email,
-      password: values.password,
+    const payload = {
+      ...values,
+      id: initialData?.id,
       roleNames: selectedRoles,
-    });
+    };
+    await handleSubmit(payload);
   };
   return (
     <div className={cn('flex flex-col gap-6')}>

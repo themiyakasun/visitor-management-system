@@ -28,6 +28,7 @@ export const useDepartmentStore = create<DepartmentStore>((set, get) => ({
           limit: response.data.pageSize,
           totalPages: response.data.totalPages,
         },
+        isLoading: false,
       });
 
       return response;
@@ -88,6 +89,29 @@ export const useDepartmentStore = create<DepartmentStore>((set, get) => ({
       toast.success(response.data.message);
       get().getAllDepartments({ page: 1, limit: 10, search: '' });
       return response;
+    } catch (error) {
+      set({ isLoading: false });
+      const message = handleApiError(error);
+      toast.error(message);
+      throw new Error(message);
+    }
+  },
+
+  updateDepartment: async ({
+    id,
+    payload,
+  }: {
+    id: string;
+    payload: DepartmentPayload;
+  }) => {
+    set({ isLoading: true });
+    try {
+      const response = await departmentSerives.updateDepartment({
+        id,
+        payload,
+      });
+      toast.success(response.data.message);
+      get().getAllDepartments({ page: 1, limit: 10, search: '' });
     } catch (error) {
       set({ isLoading: false });
       const message = handleApiError(error);
