@@ -49,4 +49,9 @@ export const departmentSerives = {
     });
     return response;
   },
+
+  getDepartmentEmployeeCount: async () => {
+    const response = await api.get('/departments/employee-count');
+    return response;
+  },
 };

@@ -23,11 +23,12 @@ import { cn } from '@/lib/utils';
 import { gateActionSchema } from '@/lib/validationts';
 import { useGateStore } from '@/stores/gateStore';
 import { usePersonStore } from '@/stores/personStore';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 const GateActionForm = () => {
   const { recordGateAction } = useGateStore();
   const { persons, getAllPersons } = usePersonStore();
+  const [personSearch, setPersonSearch] = useState('');
 
   const form = useForm({
     resolver: zodResolver(gateActionSchema),
@@ -42,10 +43,15 @@ const GateActionForm = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      await getAllPersons({ page: 1, limit: 50, search: '', type: 'all' });
+      await getAllPersons({
+        page: 1,
+        limit: 50,
+        search: personSearch,
+        type: 'all',
+      });
     };
     fetchData();
-  }, [getAllPersons]);
+  }, [getAllPersons, personSearch]);
 
   const selectedAction = form.watch('action');
 
@@ -85,6 +91,12 @@ const GateActionForm = () => {
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
+                          <Input
+                            placeholder='Search...'
+                            value={personSearch}
+                            onChange={(e) => setPersonSearch(e.target.value)}
+                            className='mb-2'
+                          />
                           {persons.map((person) => (
                             <SelectItem value={person.id} key={person.id}>
                               {person.name}
@@ -134,24 +146,27 @@ const GateActionForm = () => {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Action</FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        defaultValue={field.value}
-                      >
-                        <FormControl className='w-full'>
-                          <SelectTrigger>
-                            <SelectValue placeholder='Select action' />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value='in'>Entry</SelectItem>
-                          <SelectItem value='out'>Exit</SelectItem>
-                          <SelectItem value='breakExit'>Break Exit</SelectItem>
-                          <SelectItem value='breakReentry'>
-                            Break Reentry
-                          </SelectItem>
-                        </SelectContent>
-                      </Select>
+                      <div className='flex gap-3'>
+                        {[
+                          { label: 'Entry', value: 'in' },
+                          { label: 'Exit', value: 'out' },
+                          { label: 'Break Exit', value: 'breakExit' },
+                          { label: 'Break Reentry', value: 'breakReentry' },
+                        ].map((action) => (
+                          <Button
+                            key={action.value}
+                            type='button'
+                            variant={
+                              field.value === action.value
+                                ? 'default'
+                                : 'outline'
+                            }
+                            onClick={() => field.onChange(action.value)}
+                          >
+                            {action.label}
+                          </Button>
+                        ))}
+                      </div>
                       <FormMessage />
                     </FormItem>
                   )}

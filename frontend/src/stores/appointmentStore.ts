@@ -114,7 +114,7 @@ export const useAppointmentStore = create<AppointmentStore>((set, get) => ({
     } catch (error) {
       set({ isLoading: false });
       const message = handleApiError(error);
-      console.log(message);
+      toast.error(message);
       throw new Error(message);
     }
   },

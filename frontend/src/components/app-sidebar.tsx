@@ -16,6 +16,7 @@ import {
   SidebarRail,
 } from '@/components/ui/sidebar';
 import { NavUser } from './nav-user';
+import { useLocation } from 'react-router';
 
 // This is sample data.
 const data = {
@@ -35,7 +36,6 @@ const data = {
         {
           title: 'Roles',
           url: '/roles',
-          isActive: true,
         },
         {
           title: 'Permissions',
@@ -91,6 +91,8 @@ const data = {
 };
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const location = useLocation();
+  const currentPath = location.pathname;
   return (
     <Sidebar {...props}>
       <SidebarHeader>
@@ -115,7 +117,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           <SidebarMenu>
             {data.navMain.map((item) => (
               <SidebarMenuItem key={item.title}>
-                <SidebarMenuButton asChild>
+                <SidebarMenuButton asChild isActive={currentPath === item.url}>
                   <a href={item.url} className='font-medium'>
                     {item.title}
                   </a>
@@ -124,7 +126,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   <SidebarMenuSub>
                     {item.items.map((item) => (
                       <SidebarMenuSubItem key={item.title}>
-                        <SidebarMenuSubButton asChild isActive={item.isActive}>
+                        <SidebarMenuSubButton
+                          asChild
+                          isActive={currentPath === item.url}
+                        >
                           <a href={item.url}>{item.title}</a>
                         </SidebarMenuSubButton>
                       </SidebarMenuSubItem>

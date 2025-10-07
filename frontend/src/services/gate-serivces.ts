@@ -44,4 +44,8 @@ export const gateServices = {
     });
     return response;
   },
+  getDashboardSummary: async () => {
+    const response = await api.get('/gatelogs/get-dashboard-summary');
+    return response;
+  },
 };

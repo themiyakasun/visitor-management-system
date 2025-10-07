@@ -88,15 +88,15 @@ export function NavUser() {
             <DropdownMenuSeparator />
             <DropdownMenuItem>
               <IconNotification />
-              Change Password
+              <a href='change-password'>Change Password</a>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
-              <Button variant='ghost' onClick={handleLogout}>
+            <Button variant='ghost' onClick={handleLogout}>
+              <DropdownMenuItem>
                 <IconLogout />
                 Log out
-              </Button>
-            </DropdownMenuItem>
+              </DropdownMenuItem>
+            </Button>
           </DropdownMenuContent>
         </DropdownMenu>
       </SidebarMenuItem>

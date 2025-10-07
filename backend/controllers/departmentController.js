@@ -1,4 +1,4 @@
-const { Op } = require('sequelize');
+const { Op, fn, col } = require('sequelize');
 const { Department } = require('../models');
 const { parseQueryParams } = require('../utils/helpers.js');
 const PDFDocument = require('pdfkit');
@@ -297,6 +297,37 @@ const deleteDepartment = async (req, res) => {
   }
 };
 
+const getDepartmentEmployeeCounts = async (req, res) => {
+  try {
+    const departments = await Department.findAll({
+      where: { tenantId: req.user.tenantId },
+      attributes: [
+        'id',
+        'name',
+        [fn('COUNT', col('persons.id')), 'employeeCount'],
+      ],
+      include: [
+        {
+          association: 'persons',
+          attributes: [],
+          where: { type: 'employee' },
+          required: false,
+        },
+      ],
+      group: ['Department.id'],
+      order: [['name', 'ASC']],
+    });
+
+    return res.status(200).json({
+      success: true,
+      departments,
+    });
+  } catch (error) {
+    console.error('Error fetching department employee counts:', error);
+    return res.status(500).json({ message: 'Server error', error });
+  }
+};
+
 module.exports = {
   createDepartment,
   getDepartments,
@@ -306,4 +337,5 @@ module.exports = {
   getDepartmentById,
   generateDepartmentReport,
   generateAllDepartmentsReport,
+  getDepartmentEmployeeCounts,
 };

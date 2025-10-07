@@ -7,6 +7,7 @@ const {
   getAllActivities,
   generateActiveReport,
   generateInOutReport,
+  getDashboardSummary,
 } = require('../controllers/gateController');
 
 const router = express.Router();
@@ -18,5 +19,6 @@ router.get('/', getAllActivities);
 router.get('/today', getTodayActivity);
 router.get('/report/active', generateActiveReport);
 router.get('/report/in-out', generateInOutReport);
+router.get('/get-dashboard-summary', getDashboardSummary);
 
 module.exports = router;

@@ -1,12 +1,11 @@
 import { Button } from '@/components/ui/button';
-import { useState } from 'react';
-import { Document, Page, pdfjs } from 'react-pdf';
+import { pdfjs } from 'react-pdf';
 import { useSearchParams } from 'react-router';
 
 pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
 
 const ReportViewer = () => {
-  const [numPages, setNumPages] = useState<number | null>(null);
+  // const [numPages, setNumPages] = useState<number | null>(null);
   const searchParams = useSearchParams()[0];
   const fileUrl = searchParams.get('url');
 

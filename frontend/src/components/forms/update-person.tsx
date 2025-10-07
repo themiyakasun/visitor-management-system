@@ -26,31 +26,30 @@ import type { PersonPayload } from '@/index';
 
 const vehicleTypes = ['Car', 'Van', 'Lorry', 'Bike', 'Bus', 'Other'];
 
-const PersonAddForm = ({
-  initialValues,
-  handleSubmit,
-}: {
+interface PersonUpdateFormProps {
+  person: PersonPayload;
   handleSubmit: (values: PersonPayload) => void;
-  initialValues?: PersonPayload;
-}) => {
+}
+
+const PersonUpdateForm = ({ person, handleSubmit }: PersonUpdateFormProps) => {
   type PersonFormValues = z.infer<typeof personSchema>;
 
   const form = useForm<PersonFormValues>({
     resolver: zodResolver(personSchema),
-    defaultValues: initialValues || {
-      name: '',
-      nic: '',
-      type: 'employee',
-      id: '',
-      phone: '',
-      email: '',
-      address: '',
-      departmentId: '',
-      companyName: '',
-      purpose: '',
-      passExpiryDate: '',
-      passType: '',
-      vehicleData: [],
+    defaultValues: {
+      name: person.name,
+      nic: person.nic,
+      type: person.type,
+      id: person.id,
+      phone: person.phone,
+      email: person.email,
+      address: person.address,
+      departmentId: person.departmentId,
+      companyName: person.companyName,
+      purpose: person.purpose,
+      passExpiryDate: person.passExpiryDate,
+      passType: person.passType,
+      vehicleData: person.vehicleData || [],
     },
   });
 
@@ -61,18 +60,18 @@ const PersonAddForm = ({
     name: 'vehicleData',
   });
 
-  const onSubmit = async (values: z.infer<typeof personSchema>) => {
+  const onSubmit = async (values: PersonFormValues) => {
     const payload: PersonPayload = {
+      ...person,
       ...values,
-      id: values.id,
     };
+
+    // Set passType dynamically
     if (values.type !== 'employee') {
       payload.passType = `${values.type}Pass`;
     } else {
       payload.passType = undefined;
     }
-
-    console.log(payload);
 
     await handleSubmit(payload);
   };
@@ -84,6 +83,7 @@ const PersonAddForm = ({
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)}>
               <div className='flex flex-col gap-6'>
+                {/* Name */}
                 <FormField
                   control={form.control}
                   name='name'
@@ -98,6 +98,7 @@ const PersonAddForm = ({
                   )}
                 />
 
+                {/* NIC */}
                 <FormField
                   control={form.control}
                   name='nic'
@@ -112,6 +113,7 @@ const PersonAddForm = ({
                   )}
                 />
 
+                {/* Type */}
                 <FormField
                   control={form.control}
                   name='type'
@@ -139,23 +141,77 @@ const PersonAddForm = ({
                   )}
                 />
 
-                {/* Department (employee only) */}
+                {/* Employee only */}
                 {selectedType === 'employee' && (
-                  <FormField
-                    control={form.control}
-                    name='id'
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Employee ID</FormLabel>
-                        <FormControl>
-                          <Input placeholder='Enter employee ID' {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                  <>
+                    <FormField
+                      control={form.control}
+                      name='id'
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Employee ID</FormLabel>
+                          <FormControl>
+                            <Input placeholder='Enter employee ID' {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name='departmentId'
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Department ID</FormLabel>
+                          <FormControl>
+                            <Input
+                              placeholder='Enter department ID'
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </>
                 )}
 
+                {/* Visitor only */}
+                {selectedType === 'visitor' && (
+                  <>
+                    <FormField
+                      control={form.control}
+                      name='companyName'
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Company Name</FormLabel>
+                          <FormControl>
+                            <Input
+                              placeholder='Enter company name'
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name='purpose'
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Purpose</FormLabel>
+                          <FormControl>
+                            <Input placeholder='Enter purpose' {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </>
+                )}
+
+                {/* Phone, Email, Address, Pass Expiry */}
                 <FormField
                   control={form.control}
                   name='phone'
@@ -163,7 +219,7 @@ const PersonAddForm = ({
                     <FormItem>
                       <FormLabel>Phone</FormLabel>
                       <FormControl>
-                        <Input placeholder='Enter phone number' {...field} />
+                        <Input placeholder='Enter phone' {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -177,7 +233,7 @@ const PersonAddForm = ({
                     <FormItem>
                       <FormLabel>Email</FormLabel>
                       <FormControl>
-                        <Input placeholder='Enter email address' {...field} />
+                        <Input placeholder='Enter email' {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -198,56 +254,6 @@ const PersonAddForm = ({
                   )}
                 />
 
-                {/* Department (employee only) */}
-                {selectedType === 'employee' && (
-                  <FormField
-                    control={form.control}
-                    name='departmentId'
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Department</FormLabel>
-                        <FormControl>
-                          <Input placeholder='Enter department ID' {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                )}
-
-                {/* Company Name (visitor only) */}
-                {selectedType === 'visitor' && (
-                  <FormField
-                    control={form.control}
-                    name='companyName'
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Company Name</FormLabel>
-                        <FormControl>
-                          <Input placeholder='Enter company name' {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                )}
-
-                {selectedType === 'visitor' && (
-                  <FormField
-                    control={form.control}
-                    name='purpose'
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Purpose</FormLabel>
-                        <FormControl>
-                          <Input placeholder='Enter purpose' {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                )}
-
                 <FormField
                   control={form.control}
                   name='passExpiryDate'
@@ -262,6 +268,7 @@ const PersonAddForm = ({
                   )}
                 />
 
+                {/* Vehicles */}
                 <div className='flex flex-col gap-4'>
                   <h3 className='font-semibold text-lg'>Vehicles</h3>
                   {fields.map((field, index) => (
@@ -359,7 +366,7 @@ const PersonAddForm = ({
                       onClick={() =>
                         append({
                           numberPlate: '',
-
+                          type: 'Car',
                           model: '',
                           color: '',
                         })
@@ -371,11 +378,9 @@ const PersonAddForm = ({
                   )}
                 </div>
 
-                <div className='flex flex-col gap-3'>
-                  <Button type='submit' className='w-full'>
-                    {initialValues ? 'Update Person' : 'Create Person'}
-                  </Button>
-                </div>
+                <Button type='submit' className='w-full'>
+                  Update Person
+                </Button>
               </div>
             </form>
           </Form>
@@ -385,4 +390,4 @@ const PersonAddForm = ({
   );
 };
 
-export default PersonAddForm;
+export default PersonUpdateForm;

@@ -27,7 +27,8 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '../ui/dialog';
-import UserForm from '../forms/user-form';
+
+import UserUpdateForm from '../forms/user-update-form';
 
 const UserTable = ({
   total,
@@ -136,9 +137,9 @@ const UserTable = ({
                         <DialogHeader>
                           <DialogTitle>Edit Department</DialogTitle>
                         </DialogHeader>
-                        <UserForm
+                        <UserUpdateForm
                           handleSubmit={handleUpdate}
-                          initialData={user}
+                          user={user}
                         />
                       </DialogContent>
                     </Dialog>

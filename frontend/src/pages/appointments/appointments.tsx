@@ -11,7 +11,7 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
-import type { AppointmentPayload } from '@/index';
+import type { AppointmentPayload, AppointmentUpdatePayload } from '@/index';
 import { useAppointmentStore } from '@/stores/appointmentStore';
 import { useEffect, useState } from 'react';
 
@@ -22,6 +22,7 @@ const Appointments = () => {
     pagination,
     isLoading,
     createAppointment,
+    updateAppointment,
   } = useAppointmentStore();
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
@@ -29,6 +30,20 @@ const Appointments = () => {
 
   const handleAdd = async (values: AppointmentPayload) => {
     await createAppointment(values);
+  };
+
+  const handleUpdate = async (payload: AppointmentUpdatePayload) => {
+    await updateAppointment({ payload, id: payload.id! });
+  };
+
+  const handleSubmit = async (
+    payload: AppointmentPayload | AppointmentUpdatePayload
+  ) => {
+    if ('id' in payload) {
+      await handleUpdate(payload as AppointmentUpdatePayload);
+    } else {
+      await handleAdd(payload as AppointmentPayload);
+    }
   };
 
   useEffect(() => {
@@ -61,7 +76,7 @@ const Appointments = () => {
               <DialogHeader>
                 <DialogTitle>Create Appointment</DialogTitle>
               </DialogHeader>
-              <AppointmentForm handleSubmit={handleAdd} />
+              <AppointmentForm handleSubmit={handleSubmit} />
             </DialogContent>
           </Dialog>
         </div>
@@ -87,6 +102,7 @@ const Appointments = () => {
         page={pagination.page}
         pageSize={pagination.limit}
         onPageChange={setCurrentPage}
+        handleSubmit={handleSubmit}
       />
     </>
   );

@@ -44,6 +44,7 @@ interface AuthStore {
 
 interface DepartmentStore {
   departments: Department[];
+  employeeCount: DepartmentEmployeeCount[];
   isLoading: boolean;
   pagination: {
     page: number;
@@ -63,6 +64,7 @@ interface DepartmentStore {
     id: string;
     payload: DepartmentPayload;
   }) => Promise<any>;
+  getDepartmentEmployeeCount: () => Promise<any>;
 }
 
 interface RoleStore {
@@ -131,9 +133,21 @@ interface PersonStore {
     total: number;
     totalPages: number;
   };
-  getAllPersons: (params: ParamsPayload) => Promise<any>;
+  filters: {
+    search: string;
+    type: string;
+  };
+  getAllPersons: (params?: ParamsPayload) => Promise<any>;
   createPerson: (payload: PersonPayload) => Promise<any>;
   deletePerson: (id: string) => Promise<any>;
+  bulkUploadPersons: (file: File) => Promise<any>;
+  updatePerson: ({
+    id,
+    payload,
+  }: {
+    id: string;
+    payload: PersonPayload;
+  }) => Promise<any>;
 }
 
 interface VehicleStore {
@@ -181,6 +195,7 @@ interface AppointmentStore {
 interface GatelogStore {
   gatelogs: GateLog[];
   inOutReport: InOutGate[];
+  dashboardSummary: DashboardSummary;
   isLoading: boolean;
   pagination: {
     page: number;
@@ -193,6 +208,7 @@ interface GatelogStore {
   getAllActivity: (params: ParamsPayload) => Promise<any>;
   generateActiveReport: (params: ActiveTimeParamsPayload) => Promise<any>;
   generateInOutReport: (params: ActiveTimeParamsPayload) => Promise<any>;
+  getDashboardSummary: () => Promise<any>;
 }
 
 type ParamsPayload = {
@@ -229,6 +245,12 @@ type DepartmentPayload = {
   description?: string;
 };
 
+type DepartmentEmployeeCount = {
+  id: string;
+  name: string;
+  employeeCount: number;
+};
+
 type RolePayload = {
   id?: string;
   name: string;
@@ -244,8 +266,9 @@ type UserPayload = {
   id?: string;
   name: string;
   email: string;
-  password: string;
+  password?: string;
   roleNames?: string[];
+  roles?: Role[];
 };
 
 type User = {
@@ -293,6 +316,7 @@ type Person = {
 };
 
 export type PersonPayload = {
+  id?: string;
   name: string;
   email?: string;
   type: PersonType;
@@ -304,6 +328,7 @@ export type PersonPayload = {
   purpose?: string;
   passExpiryDate?: string;
   passType?: string;
+  vehicleData?: VehiclePayload[];
 };
 
 export type Vehicle = {
@@ -354,6 +379,7 @@ export type AppointmentPayload = {
 };
 
 export type AppointmentUpdatePayload = {
+  id?: string;
   datetime?: string;
   status?: string;
   purpose?: string;
@@ -383,4 +409,11 @@ export type GateActionPayload = {
   gateId: string;
   action: string;
   breakType?: string;
+};
+
+export type DashboardSummary = {
+  totalLogs: number;
+  totalEmployees: number;
+  totalVisitors: number;
+  totalVehicles: number;
 };

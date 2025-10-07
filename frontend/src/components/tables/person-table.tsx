@@ -16,7 +16,7 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from '../ui/pagination';
-import type { Person } from '@/index';
+import type { Person, PersonPayload } from '@/index';
 import { usePersonStore } from '@/stores/personStore';
 import {
   Dialog,
@@ -25,6 +25,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '../ui/dialog';
+import PersonUpdateForm from '../forms/update-person';
 
 const PersonTable = ({
   total,
@@ -39,7 +40,7 @@ const PersonTable = ({
   onPageChange: (page: number) => void;
   data: Person[];
 }) => {
-  const { deletePerson } = usePersonStore();
+  const { deletePerson, updatePerson } = usePersonStore();
   const totalPages = Math.ceil(total / pageSize);
 
   const handleDelete = async (id: string) => {
@@ -47,15 +48,16 @@ const PersonTable = ({
     if (isConfirmed) deletePerson(id);
   };
 
-  // const handleUpdate = async (values: PersonPayload) => {
-  //   await updatePerson({id: values.id!, payload: values})
-  // };
+  const handleUpdate = async (values: PersonPayload) => {
+    console.log(values);
+    await updatePerson({ id: values.id!, payload: values });
+  };
 
   if (!data || data.length === 0) {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Departments List</CardTitle>
+          <CardTitle>Persons List</CardTitle>
         </CardHeader>
         <CardContent>No departments found.</CardContent>
       </Card>
@@ -65,7 +67,7 @@ const PersonTable = ({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Person List</CardTitle>
+        <CardTitle>Persons List</CardTitle>
       </CardHeader>
       <CardContent>
         <Table>
@@ -93,23 +95,40 @@ const PersonTable = ({
                         <DialogHeader>
                           <DialogTitle>Edit Department</DialogTitle>
                         </DialogHeader>
-                        {/* <PersonForm
+                        <PersonUpdateForm
                           handleSubmit={handleUpdate}
-                          initialData={{
+                          person={{
                             ...person,
-                            email: person.email ?? undefined,
+                            email:
+                              person.email === null ? undefined : person.email,
+                            phone:
+                              person.phone === null ? undefined : person.phone,
+                            address:
+                              person.address === null
+                                ? undefined
+                                : person.address,
+                            companyName:
+                              person.companyName === null
+                                ? undefined
+                                : person.companyName,
                             type: person.type ?? 'employee',
-                            phone: person.phone ?? undefined,
-                            address: person.address ?? undefined,
                             nic: person.nic ?? '',
-                            companyName: person.companyName ?? undefined,
-                            purpose: person.purpose ?? undefined,
-                            passExpiryDate: person.passExpiryDate
-                              ? person.passExpiryDate.toISOString()
-                              : undefined,
-                            passType: person.passType ?? undefined,
+                            purpose:
+                              person.purpose === null
+                                ? undefined
+                                : person.purpose,
+                            passType:
+                              person.passType === null
+                                ? undefined
+                                : String(person.passType),
+                            passExpiryDate:
+                              person.passExpiryDate === null
+                                ? undefined
+                                : person.passExpiryDate instanceof Date
+                                ? person.passExpiryDate.toISOString()
+                                : person.passExpiryDate,
                           }}
-                        /> */}
+                        />
                       </DialogContent>
                     </Dialog>
                     <Button

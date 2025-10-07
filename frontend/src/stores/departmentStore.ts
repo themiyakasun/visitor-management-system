@@ -7,6 +7,7 @@ import { toast } from 'sonner';
 
 export const useDepartmentStore = create<DepartmentStore>((set, get) => ({
   departments: [],
+  employeeCount: [],
   isLoading: false,
   pagination: {
     page: 1,
@@ -116,6 +117,24 @@ export const useDepartmentStore = create<DepartmentStore>((set, get) => ({
       set({ isLoading: false });
       const message = handleApiError(error);
       toast.error(message);
+      throw new Error(message);
+    }
+  },
+
+  getDepartmentEmployeeCount: async () => {
+    set({ isLoading: true });
+    try {
+      const response = await departmentSerives.getDepartmentEmployeeCount();
+
+      set({
+        employeeCount: response.data.departments,
+        isLoading: false,
+      });
+      return response;
+    } catch (error) {
+      set({ isLoading: false });
+      const message = handleApiError(error);
+      console.log(message);
       throw new Error(message);
     }
   },

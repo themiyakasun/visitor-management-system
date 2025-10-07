@@ -46,6 +46,11 @@ export const userSchema = z
     path: ['confirm'],
   });
 
+export const userUpdateSchema = z.object({
+  name: z.string().min(1, { message: 'Name is required' }),
+  email: z.email({ message: 'Invalid email' }),
+});
+
 export const permissionSchema = z.object({
   resource: z.string().min(3, { message: 'Resource cannot be empty' }),
   action: z.string().min(3, { message: 'Action cannot be empty' }),
@@ -63,9 +68,27 @@ export const rolePermissionSchema = z.object({
   action: z.string().min(3, { message: 'Action is required' }),
 });
 
+export const vehicleSchema = z.object({
+  numberPlate: z.string().min(2, 'Number plate is required'),
+  type: z.string().optional(),
+  make: z.string().optional(),
+  model: z.string().optional(),
+  color: z.string().optional(),
+  passExpiryDate: z.string().optional(),
+  driverId: z.string().min(1, 'Driver is required'),
+});
+
+export const personVehicleSchema = z.object({
+  numberPlate: z.string().min(2, 'Number plate is required'),
+  type: z.string().optional(),
+  color: z.string().optional(),
+  model: z.string().optional(),
+});
+
 export const personSchema = z.object({
   name: z.string().min(2, 'Name is required'),
   nic: z.string().min(5, 'NIC is required'),
+  id: z.string().optional(),
   type: z.enum(['employee', 'driver', 'helper', 'visitor']),
   phone: z
     .string()
@@ -85,16 +108,7 @@ export const personSchema = z.object({
       (date) => !date || new Date(date) > new Date(),
       'Pass expiry must be in the future'
     ),
-});
-
-export const vehicleSchema = z.object({
-  numberPlate: z.string().min(2, 'Number plate is required'),
-  type: z.string().optional(),
-  make: z.string().optional(),
-  model: z.string().optional(),
-  color: z.string().optional(),
-  passExpiryDate: z.string().optional(),
-  driverId: z.string().min(1, 'Driver is required'),
+  vehicleData: z.array(personVehicleSchema).max(3).optional(),
 });
 
 export const appointmentSchema = z.object({

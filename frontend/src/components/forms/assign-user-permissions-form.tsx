@@ -13,7 +13,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { userPermissionSchema } from '@/lib/validationts';
 import type z from 'zod';
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useUserStore } from '@/stores/userStore';
 import { usePermissionStore } from '@/stores/permissionStore';
 import {
@@ -23,11 +23,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from '../ui/select';
+import { Input } from '../ui/input';
 
 const AssignUserPermissionsForm = () => {
   const { users, getUsers } = useUserStore();
   const { permissions, getAllPermissions, assignUserPermissions } =
     usePermissionStore();
+  const [userSearch, setUserSearch] = useState('');
+
   const form = useForm({
     resolver: zodResolver(userPermissionSchema),
     defaultValues: {
@@ -42,11 +45,11 @@ const AssignUserPermissionsForm = () => {
       await getUsers({
         page: 1,
         limit: 10,
-        search: '',
+        search: userSearch,
       });
     };
     fetchData();
-  }, [getUsers]);
+  }, [getUsers, userSearch]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -95,15 +98,22 @@ const AssignUserPermissionsForm = () => {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>User</FormLabel>
+
                         <FormControl>
                           <Select
                             onValueChange={field.onChange}
                             value={field.value}
                           >
                             <SelectTrigger className='w-full'>
-                              <SelectValue placeholder='Select Roles' />
+                              <SelectValue placeholder='Select Users' />
                             </SelectTrigger>
                             <SelectContent>
+                              <Input
+                                placeholder='Search...'
+                                value={userSearch}
+                                onChange={(e) => setUserSearch(e.target.value)}
+                                className='mb-2'
+                              />
                               {users.map((user) => (
                                 <SelectItem value={user.id} key={user.id}>
                                   {user.name}

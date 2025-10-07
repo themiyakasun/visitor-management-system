@@ -22,7 +22,7 @@ import type z from 'zod';
 import { cn } from '@/lib/utils';
 import { vehicleSchema } from '@/lib/validationts';
 import { usePersonStore } from '@/stores/personStore';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import type { VehiclePayload } from '@/index';
 
 const vehicleTypes = ['Car', 'Van', 'Lorry', 'Bike', 'Bus', 'Other'];
@@ -35,6 +35,7 @@ const VehicleForm = ({
   initialData?: VehiclePayload | null;
 }) => {
   const { persons, getAllPersons } = usePersonStore();
+  const [driverSearch, setDriverSearch] = useState('');
 
   const form = useForm<z.infer<typeof vehicleSchema>>({
     resolver: zodResolver(vehicleSchema),
@@ -51,10 +52,15 @@ const VehicleForm = ({
 
   useEffect(() => {
     const fetchData = async () => {
-      await getAllPersons({ page: 1, limit: 50, search: '', type: 'all' });
+      await getAllPersons({
+        page: 1,
+        limit: 50,
+        search: driverSearch,
+        type: 'all',
+      });
     };
     fetchData();
-  }, [getAllPersons]);
+  }, [getAllPersons, driverSearch]);
 
   const onSubmit = async (values: z.infer<typeof vehicleSchema>) => {
     const payload = { ...values, id: initialData?.id };
@@ -185,6 +191,12 @@ const VehicleForm = ({
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
+                          <Input
+                            placeholder='Search...'
+                            value={driverSearch}
+                            onChange={(e) => setDriverSearch(e.target.value)}
+                            className='mb-2'
+                          />
                           {persons.map((driver) => (
                             <SelectItem value={driver.id} key={driver.id}>
                               {driver.name}

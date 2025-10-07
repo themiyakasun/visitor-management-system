@@ -8,6 +8,7 @@ const {
   deleteDepartment,
   generateDepartmentReport,
   generateAllDepartmentsReport,
+  getDepartmentEmployeeCounts,
 } = require('../controllers/departmentController.js');
 const authMiddleware = require('../middlewares/authMiddleware.js');
 
@@ -17,6 +18,7 @@ router.use(authMiddleware);
 
 router.post('/', createDepartment);
 router.get('/', getDepartments);
+router.get('/employee-count', getDepartmentEmployeeCounts);
 router.get('/employees', getDeparmentEmployees);
 router.get('/full-report', generateAllDepartmentsReport);
 router.get('/report/:id', generateDepartmentReport);

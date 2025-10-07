@@ -86,7 +86,9 @@ const VehicleTable = ({
                 <TableCell>{Vehicle.type}</TableCell>
                 <TableCell>{Vehicle.model}</TableCell>
                 <TableCell>{Vehicle.color}</TableCell>
-                <TableCell>{Vehicle.driver.name}</TableCell>
+                <TableCell>
+                  {Vehicle.driver.name !== null ? Vehicle.driver.name : '-'}
+                </TableCell>
                 <TableCell>
                   <div className='flex gap-2 items-center'>
                     <Dialog>

@@ -15,7 +15,7 @@ import type z from 'zod';
 import { cn } from '@/lib/utils';
 import { appointmentSchema } from '@/lib/validationts';
 import { usePersonStore } from '@/stores/personStore';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Select,
   SelectContent,
@@ -23,16 +23,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from '../ui/select';
-import type { AppointmentPayload } from '@/index';
+import type { AppointmentPayload, AppointmentUpdatePayload } from '@/index';
 
 const AppointmentForm = ({
   handleSubmit,
   initialData,
 }: {
-  handleSubmit: (values: AppointmentPayload & { id?: string }) => void;
+  handleSubmit: (values: AppointmentPayload | AppointmentUpdatePayload) => void;
   initialData?: AppointmentPayload | null;
 }) => {
   const { persons, getAllPersons } = usePersonStore();
+  const [visitorSearch, setVisitorSearch] = useState('');
 
   const form = useForm<z.infer<typeof appointmentSchema>>({
     resolver: zodResolver(appointmentSchema),
@@ -47,14 +48,29 @@ const AppointmentForm = ({
 
   useEffect(() => {
     const fetchData = async () => {
-      await getAllPersons({ page: 1, limit: 50, search: '', type: 'visitor' });
+      await getAllPersons({
+        page: 1,
+        limit: 50,
+        search: visitorSearch,
+        type: 'visitor',
+      });
     };
     fetchData();
-  }, [getAllPersons]);
+  }, [getAllPersons, visitorSearch]);
 
   const onSubmit = async (values: z.infer<typeof appointmentSchema>) => {
-    const payload = { ...values, id: initialData?.id };
-    await handleSubmit(payload);
+    if (initialData?.id) {
+      const payload: AppointmentUpdatePayload & { id: string } = {
+        id: initialData.id,
+        datetime: values.datetime,
+        purpose: values.purpose,
+        expectedDuration: values.expectedDuration.toString(),
+      };
+      await handleSubmit(payload);
+    } else {
+      const payload: AppointmentPayload = { ...values };
+      await handleSubmit(payload);
+    }
   };
 
   return (
@@ -127,6 +143,12 @@ const AppointmentForm = ({
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
+                            <Input
+                              placeholder='Search...'
+                              value={visitorSearch}
+                              onChange={(e) => setVisitorSearch(e.target.value)}
+                              className='mb-2'
+                            />
                             {persons.map((driver) => (
                               <SelectItem value={driver.id} key={driver.id}>
                                 {driver.name}

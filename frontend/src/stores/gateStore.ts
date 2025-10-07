@@ -12,6 +12,12 @@ import { gateServices } from '@/services/gate-serivces';
 export const useGateStore = create<GatelogStore>((set, get) => ({
   gatelogs: [],
   inOutReport: [],
+  dashboardSummary: {
+    totalLogs: 0,
+    totalEmployees: 0,
+    totalVisitors: 0,
+    totalVehicles: 0,
+  },
   isLoading: false,
   pagination: {
     page: 1,
@@ -65,7 +71,7 @@ export const useGateStore = create<GatelogStore>((set, get) => ({
         gatelogs: response.data.activity,
         pagination: {
           page: response.data.page,
-          total: response.data.total,
+          total: response.data.count,
           limit: response.data.pageSize,
           totalPages: response.data.totalPages,
         },
@@ -102,7 +108,7 @@ export const useGateStore = create<GatelogStore>((set, get) => ({
     } catch (error) {
       set({ isLoading: false });
       const message = handleApiError(error);
-      console.log(message);
+      toast.error(message);
       throw new Error(message);
     }
   },
@@ -110,7 +116,6 @@ export const useGateStore = create<GatelogStore>((set, get) => ({
     set({ isLoading: true });
     try {
       const response = await gateServices.generateInOutReport(params);
-      console.log(response);
       if (params.format === 'json') {
         set({
           isLoading: false,
@@ -126,6 +131,23 @@ export const useGateStore = create<GatelogStore>((set, get) => ({
         set({ isLoading: false });
       }
 
+      return response;
+    } catch (error) {
+      set({ isLoading: false });
+      const message = handleApiError(error);
+      toast.error(message);
+      throw new Error(message);
+    }
+  },
+  getDashboardSummary: async () => {
+    set({ isLoading: true });
+    try {
+      const response = await gateServices.getDashboardSummary();
+
+      set({
+        dashboardSummary: response.data,
+        isLoading: false,
+      });
       return response;
     } catch (error) {
       set({ isLoading: false });

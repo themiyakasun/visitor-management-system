@@ -42,7 +42,9 @@ const UserForm = ({
   initialData?: UserPayload | null;
 }) => {
   const { getAllRoles, roles } = useRoleStore();
-  const [selectedRoles, setSelectedRoles] = useState<string[]>([]);
+  const [selectedRoles, setSelectedRoles] = useState<string[]>(
+    initialData?.roleNames || []
+  );
 
   const form = useForm<z.infer<typeof userSchema>>({
     resolver: zodResolver(userSchema),
@@ -67,8 +69,13 @@ const UserForm = ({
       id: initialData?.id,
       roleNames: selectedRoles,
     };
+
+    console.log(payload);
+
     await handleSubmit(payload);
   };
+
+  const isUpdate = !!initialData?.id;
   return (
     <div className={cn('flex flex-col gap-6')}>
       <Card>
@@ -111,45 +118,44 @@ const UserForm = ({
                   />
                 </div>
 
-                <div className='grid gap-3'>
-                  <FormField
-                    control={form.control}
-                    name='password'
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Password</FormLabel>
-                        <FormControl>
-                          <Input
-                            type='password'
-                            placeholder='Enter user password'
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-
-                <div className='grid gap-3'>
-                  <FormField
-                    control={form.control}
-                    name='confirmPassword'
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Confirm Password</FormLabel>
-                        <FormControl>
-                          <Input
-                            type='password'
-                            placeholder='Enter user password'
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
+                {!isUpdate && (
+                  <>
+                    <FormField
+                      control={form.control}
+                      name='password'
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Password</FormLabel>
+                          <FormControl>
+                            <Input
+                              type='password'
+                              placeholder='Enter user password'
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name='confirmPassword'
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Confirm Password</FormLabel>
+                          <FormControl>
+                            <Input
+                              type='password'
+                              placeholder='Confirm user password'
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </>
+                )}
 
                 <div className='grid gap-3'>
                   <Accordion type='single' collapsible>
@@ -169,11 +175,15 @@ const UserForm = ({
                               <SelectValue placeholder='Select Roles' />
                             </SelectTrigger>
                             <SelectContent>
-                              {roles.map((role) => (
-                                <SelectItem value={role.name} key={role.id}>
-                                  {role.name}
-                                </SelectItem>
-                              ))}
+                              {roles
+                                .filter(
+                                  (role) => !selectedRoles.includes(role.name)
+                                )
+                                .map((role) => (
+                                  <SelectItem value={role.name} key={role.id}>
+                                    {role.name}
+                                  </SelectItem>
+                                ))}
                             </SelectContent>
                           </Select>
 
@@ -204,7 +214,7 @@ const UserForm = ({
 
                 <div className='flex flex-col gap-3'>
                   <Button type='submit' className='w-full'>
-                    Create User
+                    {isUpdate ? 'Update User' : 'Create User'}
                   </Button>
                 </div>
               </div>

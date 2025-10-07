@@ -440,10 +440,71 @@ const generateInOutReport = async (req, res) => {
     return res.status(500).json({ message: 'Server error', error });
   }
 };
+
+const getDashboardSummary = async (req, res) => {
+  try {
+    const tenantId = req.user.tenantId;
+
+    const startOfDay = new Date();
+    startOfDay.setHours(0, 0, 0, 0);
+    const endOfDay = new Date();
+    endOfDay.setHours(23, 59, 59, 999);
+
+    const whereToday = {
+      tenantId,
+      timestamp: {
+        [Op.between]: [startOfDay, endOfDay],
+      },
+    };
+
+    const totalLogs = await Gatelog.count({ where: whereToday });
+
+    const totalEmployees = await Gatelog.count({
+      where: whereToday,
+      include: [
+        {
+          model: Person,
+          as: 'person',
+          where: { type: 'employee' },
+        },
+      ],
+    });
+
+    const totalVisitors = await Gatelog.count({
+      where: whereToday,
+      include: [
+        {
+          model: Person,
+          as: 'person',
+          where: { type: 'visitor' },
+        },
+      ],
+    });
+
+    const totalVehicles = await Gatelog.count({
+      where: whereToday,
+      distinct: true,
+      col: 'vehicleId',
+    });
+
+    return res.json({
+      success: true,
+      totalLogs,
+      totalEmployees,
+      totalVisitors,
+      totalVehicles,
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: 'Server error', error });
+  }
+};
+
 module.exports = {
   recordGateAction,
   getTodayActivity,
   getAllActivities,
   generateActiveReport,
   generateInOutReport,
+  getDashboardSummary,
 };

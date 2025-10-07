@@ -8,6 +8,7 @@ const createPerson = async (req, res) => {
     name,
     nic,
     type,
+    id,
     phone,
     email,
     address,
@@ -20,7 +21,6 @@ const createPerson = async (req, res) => {
   } = req.body;
 
   try {
-    console.log(type);
     if (!['employee', 'driver', 'helper', 'visitor'].includes(type))
       return res.status(400).json({ message: 'Invalid person type' });
 
@@ -51,7 +51,7 @@ const createPerson = async (req, res) => {
         .json({ message: 'Pass expiry must be a future date.' });
     }
 
-    const person = await Person.create({
+    const personData = {
       name,
       nic,
       type,
@@ -62,12 +62,16 @@ const createPerson = async (req, res) => {
       departmentId: type === 'employee' ? departmentId : null,
       companyName:
         type === 'visitor' || type === 'contractor' ? companyName : null,
-      purpose: purpose,
+      purpose,
       passType: type === 'employee' ? 'employee' : passType,
       passExpiryDate,
-    });
+    };
 
-    if (type === 'driver' && vehicleData?.length > 0) {
+    if (id) personData.id = id;
+
+    const person = await Person.create(personData);
+
+    if (vehicleData?.length > 0) {
       const vehiclesToCreate = vehicleData.map((v) => ({
         ...v,
         driverId: person.id,
@@ -178,11 +182,13 @@ const bulkUploadPersons = async (req, res) => {
     }
 
     return res.status(201).json({
+      message: 'File uploaded successfully',
       successCount: validPersons.length,
       errorCount: errors.length,
       errors,
     });
   } catch (error) {
+    console.log(error);
     return res.status(500).json({ message: 'Server error' });
   }
 };
@@ -293,7 +299,11 @@ const updatePerson = async (req, res) => {
       return res.status(404).json({ message: 'Person cannot be found' });
 
     const isEmailExists = await Person.findOne({
-      where: { email, tenantId: req.user.tenantId },
+      where: {
+        email,
+        tenantId: req.user.tenantId,
+        id: { [Op.ne]: req.params.id },
+      },
     });
     if (isEmailExists)
       return res.status(400).json({ message: 'Email already exists' });

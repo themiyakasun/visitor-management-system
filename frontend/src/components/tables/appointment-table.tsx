@@ -1,4 +1,8 @@
-import type { Appointment } from '@/index';
+import type {
+  Appointment,
+  AppointmentPayload,
+  AppointmentUpdatePayload,
+} from '@/index';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import {
   Table,
@@ -18,6 +22,14 @@ import {
   PaginationPrevious,
 } from '../ui/pagination';
 import { useAppointmentStore } from '@/stores/appointmentStore';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '../ui/dialog';
+import AppointmentForm from '../forms/appointment-form';
 
 const AppointmentTable = ({
   total,
@@ -26,6 +38,7 @@ const AppointmentTable = ({
   onPageChange,
   data,
   showActions = true,
+  handleSubmit,
 }: {
   total: number;
   page: number;
@@ -33,6 +46,7 @@ const AppointmentTable = ({
   onPageChange: (page: number) => void;
   data: Appointment[];
   showActions?: boolean;
+  handleSubmit: (values: AppointmentPayload | AppointmentUpdatePayload) => void;
 }) => {
   const { updateAppointment } = useAppointmentStore();
   const totalPages = Math.ceil(total / pageSize);
@@ -99,7 +113,20 @@ const AppointmentTable = ({
                 {showActions && (
                   <TableCell>
                     <div className='flex gap-2 items-center'>
-                      <Button size='sm'>Edit</Button>
+                      <Dialog>
+                        <DialogTrigger asChild>
+                          <Button size='sm'>Edit</Button>
+                        </DialogTrigger>
+                        <DialogContent className='sm:max-w-[700px] max-h-[800px] overflow-scroll'>
+                          <DialogHeader>
+                            <DialogTitle>Edit Appointment</DialogTitle>
+                          </DialogHeader>
+                          <AppointmentForm
+                            handleSubmit={handleSubmit}
+                            initialData={appointment}
+                          />
+                        </DialogContent>
+                      </Dialog>
                       <Button
                         variant='destructive'
                         size='sm'
