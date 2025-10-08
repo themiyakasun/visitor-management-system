@@ -7,11 +7,13 @@ import Login from '@/pages/auth/login';
 import Unauthorized from '@/pages/auth/unauthorized';
 import Dashboard from '@/pages/dashboard/dashboard';
 import Departments from '@/pages/departments/departments';
+import Device from '@/pages/device/device';
 import GateLogs from '@/pages/gate-logs/gate-logs';
 import Permissions from '@/pages/permissions/permissions';
 import Persons from '@/pages/persons/persons';
 import ReportViewer from '@/pages/reports/report-viewer';
 import Roles from '@/pages/roles/roles';
+import Tenants from '@/pages/tenants/tenants';
 import TimeInOut from '@/pages/time-in-out-report/time-in-out';
 import Users from '@/pages/users/users';
 import Vehicles from '@/pages/vehicles/vehicles';
@@ -46,6 +48,10 @@ const router = createBrowserRouter([
             <Dashboard />
           </ProtectedRoutes>
         ),
+      },
+      {
+        path: '/tenants',
+        element: <Tenants />,
       },
       {
         path: '/departments',
@@ -94,6 +100,10 @@ const router = createBrowserRouter([
       {
         path: '/appointment-log-report',
         element: <AppointmentLogReport />,
+      },
+      {
+        path: '/devices',
+        element: <Device />,
       },
     ],
   },

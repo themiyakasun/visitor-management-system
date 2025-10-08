@@ -118,7 +118,7 @@ export const appointmentSchema = z.object({
     .number({ message: 'Expected duration must be a number' })
     .min(1, 'Duration must be at least 1 minute'),
   visitorId: z.string().optional(),
-  employeeId: z.string().optional(),
+  employeeId: z.string().optional().or(z.literal('')).nullable(),
 });
 
 export const gateActionSchema = z.object({

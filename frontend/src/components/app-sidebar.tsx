@@ -30,6 +30,10 @@ const data = {
       url: '#',
       items: [
         {
+          title: 'Tenants',
+          url: '/tenants',
+        },
+        {
           title: 'Departments',
           url: '/departments',
         },
@@ -66,6 +70,16 @@ const data = {
         {
           title: 'Gate Logs',
           url: '/gate-logs',
+        },
+      ],
+    },
+    {
+      title: 'Devices',
+      url: '#',
+      items: [
+        {
+          title: 'All Devices',
+          url: '/devices',
         },
       ],
     },

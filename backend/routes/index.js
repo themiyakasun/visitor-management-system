@@ -10,9 +10,11 @@ const roleRoutes = require('./roleRoutes.js');
 const shiftRoutes = require('./shiftRoutes.js');
 const permissionRoutes = require('./permissionRoutes.js');
 const appointmentRoutes = require('./appointmentRoutes.js');
+const tenantRoutes = require('./tenantRoutes.js');
 
 const router = express.Router();
 
+router.use('/tenants', tenantRoutes);
 router.use('/users', userRoutes);
 router.use('/auth', authRoutes);
 router.use('/departments', departmentRoutes);

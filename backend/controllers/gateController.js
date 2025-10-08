@@ -282,7 +282,7 @@ const generateActiveReport = async (req, res) => {
     const itemSpacing = 20;
     gateLogs.rows.forEach((log) => {
       doc.text(log.person ? log.person.name : '-', 50, y);
-      doc.text(log.vehicle ? log.vehicle.plateNumber : '-', 200, y);
+      doc.text(log.vehicle ? log.vehicle.numberPlate : '-', 200, y);
       doc.text(log.type, 300, y);
       doc.text(new Date(log.timestamp).toLocaleString(), 400, y);
       y += itemSpacing;

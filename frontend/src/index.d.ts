@@ -417,3 +417,99 @@ export type DashboardSummary = {
   totalVisitors: number;
   totalVehicles: number;
 };
+
+interface Device {
+  ID: string;
+  DevSN: string;
+  [key: string]: any;
+}
+
+interface Paginator {
+  totalPages: number;
+  totalItems: number;
+  currentPage: number;
+}
+
+interface DeviceStore {
+  devices: Device[];
+  allDevices: Device[];
+  companies: any[];
+  areas: any[];
+  locations: any[];
+  zones: any[];
+  selectedDevices: Device[];
+  paginator: Paginator;
+  currentPage: number;
+  selectedLimit: number;
+
+  getPaginatedDevices: () => Promise<void>;
+  getDevices: () => Promise<void>;
+  getAllDevices: () => Promise<void>;
+  deleteDevice: (id: string) => Promise<void>;
+
+  getCompanies: () => Promise<void>;
+  getAreas: () => Promise<void>;
+  getLocations: () => Promise<void>;
+  getZones: () => Promise<void>;
+
+  getUserDataByDevSN: (device: Device) => Promise<void>;
+  rebootDeviceByDevSN: (device: Device) => Promise<void>;
+  getDeviceInfoByDevSN: (device: Device) => Promise<void>;
+  getTransactionOfDeviceByDate: (
+    device: Device,
+    content: string
+  ) => Promise<void>;
+  issueCommand: (
+    device: Device,
+    type: string,
+    content: string
+  ) => Promise<void>;
+
+  isSelected: (device: Device) => boolean;
+  toggleDeviceSelection: (device: Device) => void;
+
+  incrementPage: () => void;
+  decrementPage: () => void;
+}
+
+export interface TenantPayload {
+  id: any;
+  name: string;
+  slug: string;
+  description?: string;
+  email?: string;
+  address?: string;
+  city?: string;
+  state?: string;
+  zipCode?: string;
+  country?: string;
+  latitude?: number;
+  longitude?: number;
+  phone?: string;
+  altPhone?: string;
+  fax?: string;
+  website?: string;
+  logo?: string;
+  businessId?: string;
+  taxId?: string;
+  acPushUsername?: string;
+  acPushPassword?: string;
+  acPushUrl?: string;
+  registrationFee?: number;
+}
+
+export interface TenantStore {
+  tenants: TenantPayload[];
+  isLoading: boolean;
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
+  getAllTenants: (params: ParamsPayload) => Promise<any>;
+  createTenant: (values: TenantPayload) => Promise<any>;
+  updateTenant: (args: { id: string; payload: TenantPayload }) => Promise<any>;
+  deleteTenant: (id: string) => Promise<any>;
+  getTenantById: (id: string) => Promise<any>;
+}

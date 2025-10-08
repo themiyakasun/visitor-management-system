@@ -68,7 +68,10 @@ const AppointmentForm = ({
       };
       await handleSubmit(payload);
     } else {
-      const payload: AppointmentPayload = { ...values };
+      const payload: AppointmentPayload = {
+        ...values,
+        employeeId: values.employeeId ?? undefined,
+      };
       await handleSubmit(payload);
     }
   };
@@ -126,59 +129,69 @@ const AppointmentForm = ({
                   )}
                 />
 
-                <FormField
-                  control={form.control}
-                  name='visitorId'
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Visitor ID</FormLabel>
-                      <FormControl>
-                        <Select
-                          onValueChange={field.onChange}
-                          defaultValue={field.value}
-                        >
-                          <FormControl className='w-full'>
-                            <SelectTrigger>
-                              <SelectValue placeholder='Select visitor' />
-                            </SelectTrigger>
+                {!initialData && (
+                  <>
+                    <FormField
+                      control={form.control}
+                      name='visitorId'
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Visitor ID</FormLabel>
+                          <FormControl>
+                            <Select
+                              onValueChange={field.onChange}
+                              defaultValue={field.value}
+                            >
+                              <FormControl className='w-full'>
+                                <SelectTrigger>
+                                  <SelectValue placeholder='Select visitor' />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                <Input
+                                  placeholder='Search...'
+                                  value={visitorSearch}
+                                  onChange={(e) =>
+                                    setVisitorSearch(e.target.value)
+                                  }
+                                  className='mb-2'
+                                />
+                                {persons.map((driver) => (
+                                  <SelectItem value={driver.id} key={driver.id}>
+                                    {driver.name}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
                           </FormControl>
-                          <SelectContent>
-                            <Input
-                              placeholder='Search...'
-                              value={visitorSearch}
-                              onChange={(e) => setVisitorSearch(e.target.value)}
-                              className='mb-2'
-                            />
-                            {persons.map((driver) => (
-                              <SelectItem value={driver.id} key={driver.id}>
-                                {driver.name}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
 
-                <FormField
-                  control={form.control}
-                  name='employeeId'
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Employee ID (optional)</FormLabel>
-                      <FormControl>
-                        <Input placeholder='Enter employee ID' {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                    <FormField
+                      control={form.control}
+                      name='employeeId'
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Employee ID (optional)</FormLabel>
+                          <FormControl>
+                            <Input
+                              placeholder='Enter employee ID'
+                              {...field}
+                              value={field.value ?? ''}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </>
+                )}
 
                 <div className='flex flex-col gap-3'>
                   <Button type='submit' className='w-full'>
-                    Create Appointment
+                    {initialData ? 'Update Appointment' : ' Create Appointment'}
                   </Button>
                 </div>
               </div>
